@@ -159,19 +159,18 @@ python3 scripts/tc04_agentcfs.py                                    # 北京，V
 |---|---|---|
 | AgentBucket 媒体库 | `smh3qv6cmcoscm4i`（`cedricbwang-agentbucket`，多空间） | ✅ TC-02 已通过 |
 | AgentBucket 空间 | `space3ly9r9ni7fhju` | ✅ |
-| AgentCFS | `cfs-45a313f3e`（TURBO 型） | ⏸ 缺挂载点 |
+| AgentCFS | `cfs-45a313f3e`（TURBO 型，挂载点已建） | ✅ TC-04 已通过 |
 | 被测镜像 | `euson-tcr.tencentcloudcr.com/cedricbwang/test:v1` | ⏸ 仓库为空 |
 | 已验证镜像 | `euson-tcr.tencentcloudcr.com/sandbox/sandbox:v1` | ✅ TC-01 已通过 |
-| 已验证 CFS | `cfs-cunkkj23`（NFS） | ✅ TC-04 已通过 |
+| 备用 CFS | `cfs-cunkkj23`（NFS） | ✅ 早期验证 |
 
 ### 待办
 
 | 项 | 说明 |
 |---|---|
-| 推送被测镜像 | `cedricbwang/test:v1` 仓库当前 0 个 tag；该 namespace 为私有，还需确认角色拉取权限 |
-| 创建 CFS 挂载点 | `cfs-45a313f3e` 无挂载点；CFS PaaS API 无 `CreateMountTarget`，需在控制台添加（建议 `vpc-ovochv3a` / `subnet-pac3o08j`） |
+| 推送被测镜像 | `cedricbwang/test:v1` 仓库当前 **0 个 tag**；该 namespace 为私有，还需确认 `ags-tcr-full` 角色有拉取权限。TC-01/TC-04 暂用已验证镜像 `sandbox/sandbox:v1`，镜像就绪后需复测 |
 
-用 `scripts/check_readiness.py` 可随时确认这两项是否已就绪：
+用 `scripts/check_readiness.py` 可随时确认：
 
 ```bash
 python3 scripts/check_readiness.py        # 只检查

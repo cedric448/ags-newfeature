@@ -3,8 +3,8 @@
 | 项 | 值 |
 |---|---|
 | 结论 | **PASS** |
-| 执行时间 | 2026-09-19 15:08:22 |
-| 耗时 | 77.9s |
+| 执行时间 | 2026-09-19 15:30:32 |
+| 耗时 | 84.8s |
 | 网络模式 | VPC |
 
 ## 测试目的
@@ -19,7 +19,7 @@
 
 | # | 步骤 | 结论 | 耗时 | 说明 |
 |---|------|------|------|------|
-| 1 | 创建工具阶段未校验 Path（工具被接受） | ✅ PASS | 0.0s | ToolId=sdt-2bithq3y |
+| 1 | 创建工具阶段未校验 Path（工具被接受） | ✅ PASS | 0.0s | ToolId=sdt-8gkzkvvo |
 | 2 | 工具仍变为 ACTIVE（与文档描述不符） | ✅ PASS | 0.0s | Status=ACTIVE |
 | 3 | 启动实例阶段报 FailedOperation.StorageMount | ✅ PASS | 0.0s | 错误在实例启动阶段暴露，信息明确 |
 
@@ -27,15 +27,15 @@
 
 ```
 {
-  "ToolId": "sdt-2bithq3y",
-  "RequestId": "f81b6070-9c36-4d77-9a27-a0e5c1a482da"
+  "ToolId": "sdt-8gkzkvvo",
+  "RequestId": "9842ce7e-c37f-4422-be51-87e9d3fcfcd2"
 }
 ```
 
 ### 证据 3: 启动实例阶段报 FailedOperation.StorageMount
 
 ```
-[FailedOperation.StorageMount] [TencentCloudSDKException] code:FailedOperation.StorageMount message:storage mount path "10.133.247.137:/ybvynadx/agstest-nonexistent-1789801669" not found or unreachable, please check StorageMount CFS/NFS path and network configuration requestId:6222a37d-a2af-4751-b7aa-3da180ed1e9e (RequestId: 6222a37d-a2af-4751-b7aa-3da180ed1e9e)
+[FailedOperation.StorageMount] [TencentCloudSDKException] code:FailedOperation.StorageMount message:storage mount path "[\"30.1.0.16@tcp0:/5a313f3e/cfs/agstest-nonexistent-1789803009\",\"/data/cubelet/storage/io.cubelet.internal.v1.storage/turbocfs/463d75029da1ed83368a1d751321d6d6/mnt\"]" not found or unreachable, please check StorageMount CFS/NFS path and network configuration requestId:547e0b23-db39-4a97-b37a-aefeba9ea117 (RequestId: 547e0b23-db39-4a97-b37a-aefeba9ea117)
 ```
 
 ## 备注

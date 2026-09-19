@@ -78,7 +78,7 @@ AGENTBUCKET_LIBRARY_SECRET=<见本地 .env，勿提交>
 
 ---
 
-## 二、AgentCFS —— ⏸ 待创建挂载点
+## 二、AgentCFS —— ✅ 已就绪
 
 ### 2.1 排查结论（我已验证）
 
@@ -99,24 +99,25 @@ AGENTBUCKET_LIBRARY_SECRET=<见本地 .env，勿提交>
 实测 `cfs-cunkkj23`（NFS）可直接被 AGS 接受并正常挂载读写，TC-04 全部用例
 （挂载 / 读写 / 跨实例持久化 / subPath 隔离 / MountPath 覆盖）均已通过。
 
-**路径 B（用户指定的专用 AgentCFS）**：`cfs-45a313f3e`
+**路径 B（用户指定的专用 AgentCFS，当前使用）**：`cfs-45a313f3e` ✅ 已就绪
 - 类型：`protocol=TURBO`、`storage=TP`、zone `ap-beijing-6`、名称 `cedricbwang`
-- **当前无挂载点**，AGS 报 `no mount targets found for CFS`
-- ⚠️ CFS 的 PaaS API **不提供创建挂载点的接口**（全套 54 个 action 中无 `CreateMountTarget`），
-  只能在控制台操作
+- 挂载点：`5a313f3e`，`vpc-j5tuypwg` / `subnet-amedci6t`
+- **实测可用**：TC-04 全部用例通过（13/14，唯一失败项为 BUG-01 功能缺陷）
 
-### 2.3 如何为 `cfs-45a313f3e` 创建挂载点
+> 提示：该挂载点位于 `vpc-j5tuypwg`，而测试沙箱在 `vpc-ovochv3a`，
+> **跨 VPC 场景下挂载依然正常**，说明 AGS 侧通过挂载点 IP 直连、不要求同 VPC。
+
+### 2.3（备查）挂载点的创建方式
+
+若为其他 CFS 创建挂载点：
 
 1. 打开 [文件存储控制台](https://console.cloud.tencent.com/cfs)
-2. 找到 `cfs-45a313f3e`（名称 `cedricbwang`）
-3. 进入「挂载点」页签 → 「添加挂载点」
-4. 选择**与沙箱互通的 VPC**，推荐：
-   - VPC：`vpc-ovochv3a`
-   - 子网：`subnet-pac3o08j`（ap-beijing-8）
-   - 权限组：默认放通
-5. 创建后可用 `python3 scripts/check_readiness.py` 确认
+2. 找到目标文件系统 → 进入「挂载点」页签 → 「添加挂载点」
+3. 选择 VPC、子网与权限组（权限组需放通沙箱网段）
+4. 创建后用 `python3 scripts/check_readiness.py` 确认
 
-> 注意：TURBO 型 CFS 可能对可用区/VPC 有额外约束，若创建失败请按控制台提示调整。
+> ⚠️ CFS 的 PaaS API **不提供创建挂载点的接口**（全套 54 个 action 中无 `CreateMountTarget`），
+> 只能在控制台操作。
 
 > 现有文件系统中 `cfs-cunkkj23`（jw-test）容量为 0 且看起来是测试用途。
 > 如果你希望避免新建成本，可以让我先**试挂一个普通 NFS**看 AGS 是否接受 —— 
@@ -177,7 +178,7 @@ AGENTBUCKET_LIBRARY_ID=smh3qv6cmcoscm4i
 AGENTBUCKET_SPACE_ID=space3ly9r9ni7fhju
 AGENTBUCKET_LIBRARY_SECRET=<见本地 .env>
 
-# AgentCFS —— 已指定，待创建挂载点
+# AgentCFS —— 已就绪，TC-04 已通过
 AGENTCFS_FILE_SYSTEM_ID=cfs-45a313f3e
 AGENTCFS_PATH=/
 
@@ -202,7 +203,7 @@ AGT_IMAGE=euson-tcr.tencentcloudcr.com/cedricbwang/test:v1
 | CAM Role | `ags-tcr-full`（`AdministratorAccess` + `QcloudTCRFullAccess`，信任 `ags.cloud.tencent.com`） |
 | 已验证镜像 | `euson-tcr.tencentcloudcr.com/sandbox/sandbox:v1`（1.79GB，内置 `/usr/bin/envd`，Python 3.12.13） |
 | 待验证镜像 | `euson-tcr.tencentcloudcr.com/cedricbwang/test:v1`（用户提供，仓库当前为空） |
-| 已验证 CFS | `cfs-cunkkj23`（NFS，TC-04 已通过） |
-| 待验证 CFS | `cfs-45a313f3e`（TURBO，缺挂载点） |
+| 被测 CFS | `cfs-45a313f3e`（TURBO 型 AgentCFS，挂载点已建，TC-04 已通过） |
+| 备用 CFS | `cfs-cunkkj23`（NFS，早期验证） |
 | envd 启动命令 | `/usr/bin/envd -port 49983`（健康检查 `/health` 返回 204） |
 | TCR | 实例 `tcr-mvlaq1sq`，域名 `euson-tcr.tencentcloudcr.com` |

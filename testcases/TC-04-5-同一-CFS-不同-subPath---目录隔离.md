@@ -3,8 +3,8 @@
 | 项 | 值 |
 |---|---|
 | 结论 | **PASS** |
-| 执行时间 | 2026-09-19 15:09:03 |
-| 耗时 | 36.2s |
+| 执行时间 | 2026-09-19 15:31:10 |
+| 耗时 | 47.2s |
 | 网络模式 | VPC |
 
 ## 测试目的
@@ -19,7 +19,7 @@ TC-04-4 已在根目录写入数据
 
 | # | 步骤 | 结论 | 耗时 | 说明 |
 |---|------|------|------|------|
-| 1 | 带 MountOptions.SubPath 启动实例 | ✅ PASS | 0.0s | InstanceId=2nhmljik7hb2fkwg3c3xv4gvpisiklrb5zkamqzj |
+| 1 | 带 MountOptions.SubPath 启动实例 | ✅ PASS | 0.0s | InstanceId=ufcrrosj4f2kezxbztg6bh7eyqio3omceyjn6u7b |
 | 2 | 不同 subPath 看不到原目录数据 | ✅ PASS | 0.0s | 隔离生效 |
 
 ### 证据 1: 带 MountOptions.SubPath 启动实例
@@ -30,7 +30,7 @@ TC-04-4 已在根目录写入数据
     {
       "Name": "cfs-workspace",
       "MountPath": "/mnt/cfs-alt",
-      "SubPath": "iso-1789801669"
+      "SubPath": "iso-1789803009"
     }
   ]
 }

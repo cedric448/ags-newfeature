@@ -17,13 +17,17 @@
 | **TC-01** | 沙箱基线：TCR 镜像创建工具并启动实例 | ✅ **PASS** | 10/10 | 原阻塞问题已完全定位并解决 |
 | **TC-02** | AgentBucket 持久化存储 | ✅ **PASS** | 17/17 | 含持久化、隔离、只读、负例 |
 | **TC-03** | Agent Engine（弹性部署 Deployment） | ✅ **PASS** | 17/17 | 仅在 `ap-shanghai` 可用 |
-| **TC-04** | AgentCFS 共享存储 | ⚠️ **PASS（1 缺陷）** | 13/14 | 发现真实缺陷：只读收紧在 CFS 上未生效 |
+| **TC-04** | AgentCFS 共享存储 | ⚠️ **PASS（1 缺陷）** | 13/14 | 用户 CFS `cfs-45a313f3e`；BUG-01 复现 |
 | TC-05 | 模板快照 Template Snapshot | ⏭ **SKIP** | — | 按决策暂缓：公开 API/SDK/文档均无 Snapshot 能力 |
 | TC-06 | 沙箱快照 Sandbox Snapshot | ⏭ **SKIP** | — | 同上 |
 | TC-07 | WAA 沙箱 | ⏭ **SKIP** | — | 按决策暂缓（重依赖） |
 | TC-08 | OSWorld 沙箱 | ⏭ **SKIP** | — | 按决策暂缓（重依赖） |
 
 **总计：4 个测试例，59 个检查点，58 通过 / 1 失败（真实产品缺陷）。**
+
+> 全部测试例均使用**用户提供的自建资源**：
+> AgentBucket 媒体库 `smh3qv6cmcoscm4i`、AgentCFS `cfs-45a313f3e`。
+> BUG-01 在两个不同 CFS 实例上均可复现，确认与具体实例无关。
 
 ### 缺陷汇总
 
@@ -210,7 +214,13 @@ AGS received the provider result`。经逐项定位，真实根因是**五个独
 | TC-04-6 | 实例级只读收紧 | ❌ **FAIL** | **真实缺陷**：`ReadOnly=true` 被接受但挂载仍 `rw` |
 | TC-04-7 | `MountPath` 覆盖默认路径 | ✅ | `/mnt/cfs` → `/mnt/cfs-alt` 生效 |
 
-**复用资源**：`cfs-cunkkj23`（`jw-test`，普通 NFS，ap-beijing-6）
+**使用资源**（用户提供）：`cfs-45a313f3e`（名称 `cedricbwang`）
+- 类型：`protocol=TURBO`、`storage=TP`、zone `ap-beijing-6` —— 真正的 AgentCFS
+- 挂载点：`5a313f3e`，`vpc-j5tuypwg` / `subnet-amedci6t` / `10.x` 内网 IP
+- 实测：跨 VPC 场景下仍可正常挂载读写（沙箱在 `vpc-ovochv3a`）
+
+**结论**：7 个用例 13/14 检查点通过。**BUG-01 在用户的 AgentCFS 上同样复现**，
+进一步确认该缺陷与具体 CFS 实例无关，属功能实现问题。
 
 产物：`scripts/tc04_agentcfs.py`、`reports/TC-04.md`、7 个用例文档
 

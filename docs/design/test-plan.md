@@ -126,8 +126,8 @@
 ### TC-04 AgentCFS 使用 —— 档位 B ✅ 已完成
 - **依据**：`https://cloud.tencent.com/document/product/582/137338` + AGS 存储挂载文档 132215
 - **已完成 7 个用例**：见 `reports/TC-04.md`
-- **重要发现**：文档要求「架构类型 = Agent 文件系统」，但**实测普通 NFS 型 CFS
-  （`cfs-cunkkj23`）也能被 AGS 正常接受并挂载读写**，无需额外创建 AgentCFS。
+- **使用资源**：`cfs-45a313f3e`（`cedricbwang`，TURBO 型 AgentCFS，挂载点已建）
+- **兼容性**：另实测普通 NFS 型 CFS（`cfs-cunkkj23`）也能被 AGS 接受并挂载读写
 - **发现缺陷 BUG-01**：CFS 的实例级 `MountOptions.ReadOnly=true` 被接受但**未生效**
   （挂载仍为 `rw`，写入成功）；对照 AgentBucket 同类能力正常。
 
