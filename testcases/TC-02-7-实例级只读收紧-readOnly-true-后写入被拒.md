@@ -3,7 +3,7 @@
 | 项 | 值 |
 |---|---|
 | 结论 | **PASS** |
-| 执行时间 | 2026-09-19 14:43:00 |
+| 执行时间 | 2026-09-19 15:25:54 |
 | 耗时 | 2.0s |
 | 网络模式 | VPC |
 
@@ -25,7 +25,7 @@
 
 ```
 {
-  "stdout": "WRITE-DENIED\ntotal 1\n-rwxrwxrwx 1 root root 30 Sep 19 06:42 file-api.txt\n-rwxrwxrwx 1 root root 13 Sep 19 06:42 probe.txt\n",
+  "stdout": "WRITE-DENIED\ntotal 1\n-rwxrwxrwx 1 root root 30 Sep 19 07:25 file-api.txt\n-rwxrwxrwx 1 root root 13 Sep 19 07:25 probe.txt\n",
   "stderr": "/bin/bash: line 1: /mnt/data/agentbucket-alt/agstest/ro-should-fail.txt: Read-only file system\n",
   "exit": 0
 }

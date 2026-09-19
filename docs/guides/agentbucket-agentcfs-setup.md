@@ -6,79 +6,64 @@
 
 ---
 
-## 一、AgentBucket —— 已基本就绪，只缺 spaceID
+## 一、AgentBucket —— ✅ 已就绪
 
-### 1.1 排查结论（我已验证）
+### 1.1 状态（2026-09-19 更新）
 
 | 依赖项 | 状态 | 说明 |
 |---|---|---|
-| SMH Library | ✅ **已有 3 个** | 见下表 |
-| CAM Role | ✅ **已有** | `ags-tcr-full` 已具备 SMH 权限 |
-| Role 信任关系 | ✅ **已正确** | 信任 `ags.tencentcloud.com` |
-| TCR 镜像 | ✅ **已有** | `euson-tcr.tencentcloudcr.com/sandbox/sandbox:v1` |
-| VPC 安全组 | ✅ **已创建** | `sg-p3sxc9y3`（`agstest-sg`） |
-| **spaceID** | ❌ **缺失** | **这是唯一需要你补的** |
-| LibrarySecret | ✅ 已取到 | `smh2ws7gv815z8r3` 的 secret 我已能读取 |
+| SMH Library | ✅ 用户提供 | `smh3qv6cmcoscm4i`（`cedricbwang-agentbucket`） |
+| Library 多空间 | ✅ `IsMultiSpace=true` | `subPath=spaceID` 模式的前提 |
+| LibrarySecret | ✅ 已配置 | 已写入本地 `.env`（`AGENTBUCKET_LIBRARY_SECRET`） |
+| spaceID | ✅ 已获得 | `space3ly9r9ni7fhju`（该库共 2 个空间，取第一个） |
+| CAM Role | ✅ 已有 | `ags-tcr-full`，信任 `ags.cloud.tencent.com`，含 `AdministratorAccess` |
+| VPC / 安全组 | ✅ 已有 | `vpc-ovochv3a` / `subnet-pac3o08j` / `sg-p3sxc9y3` |
+| 镜像 | ✅ 已有 | `euson-tcr.tencentcloudcr.com/sandbox/sandbox:v1` |
 
-**已实测**：创建带 `StorageSource.AgentBucket.LibraryId` 的 code-interpreter 工具 → 状态 `ACTIVE`；
-启动实例 → `RUNNING`；挂载点 `/mnt/data/agentbucket` 已出现（`virtiofs`，500M）。
-但因为没传 `subPath`（= spaceID），目录无法列举（`Operation not supported`），
-说明**必须补 spaceID 才能真正读写**。
+**TC-02 全部 8 个用例已用该库执行通过（17/17 检查点）。**
 
-### 1.2 已有 SMH Library
+### 1.2 如何获得 spaceID
+
+SMH 的 spaceID 可以通过业务面 API 自动获取（无需控制台操作）：
+
+```bash
+# 1) 用 LibrarySecret 换 AccessToken
+curl "https://{LibraryId}.ap-beijing.api.tencentsmh.cn/api/v1/token?\
+library_id={LibraryId}&library_secret={LibrarySecret}&grant=admin&period=3600"
+
+# 2) 列出该库的所有空间
+curl "https://{LibraryId}.ap-beijing.api.tencentsmh.cn/api/v1/space/{LibraryId}/list?\
+access_token={AccessToken}&limit=100"
+```
+
+响应中的 `list[].spaceId` 即为可传给 `metadata.x-mounts[].subPath` 的 spaceID。
+
+也可在 [SMH 控制台](https://console.cloud.tencent.com/smh) 的「空间管理」页面查看。
+
+### 1.3 当前配置（已在 `.env` 中）
+
+```bash
+AGENTBUCKET_LIBRARY_ID=smh3qv6cmcoscm4i
+AGENTBUCKET_SPACE_ID=space3ly9r9ni7fhju
+AGENTBUCKET_LIBRARY_SECRET=<见本地 .env，勿提交>
+```
+
+### 1.4 账号下其他可用的 SMH Library（备查）
 
 | LibraryId | 名称 | 多空间 | 备注 |
 |---|---|---|---|
-| `smh2ws7gv815z8r3` | leotestforkimi | ✅ True | **remark = "agent bucket test" ← 推荐用这个** |
+| `smh3qv6cmcoscm4i` | cedricbwang-agentbucket | ✅ True | **本次测试使用** |
 | `smh3cy4mpur43m1j` | FredTest | ❌ False | 单空间，不适合 spaceID 模式 |
 | `smh223rot7x8yvmc` | ClawPro-admin-1258272081-0 | ✅ True | |
+| `smh2ws7gv815z8r3` | leotestforkimi | ✅ True | 早期探测用 |
 
-> 注意：AgentBucket 的 E2B `subPath=spaceID` 模式要求 Library **开启多空间**（`IsMultiSpace=true`）。
-> `FredTest` 不满足，`leotestforkimi` 和 `ClawPro-admin-...` 满足。
+### 1.5 若需新建 Role（当前不必要）
 
-### 1.3 ✅ 已完成：spaceID 已自动发现
+现有 `ags-tcr-full` 已关联 `AdministratorAccess`，SMH 权限已覆盖。若要最小权限化：
 
-> **2026-09-19 更新**：我已通过 SMH 业务面 API 自动拿到 spaceID，**无需你操作**。
->
-> - LibraryId：`smh2ws7gv815z8r3`（`leotestforkimi`，多空间）
-> - **spaceID：`space2qq0z835d4ocj`**
-> - 获取方式：`GET /api/v1/token?library_id=<lib>&library_secret=<secret>&grant=admin`
->   换取 AccessToken，再 `GET /api/v1/space/{libraryId}/list?access_token=<token>`
->
-> TC-02 全部 8 个用例已用该 spaceID 执行通过。下方步骤仅作备查。
-
-### 1.3（备查）如何手工获取 spaceID
-
-**方式 A：SMH 控制台（推荐）**
-
-1. 打开 [智能媒资托管控制台](https://console.cloud.tencent.com/smh)
-2. 进入 `leotestforkimi`（LibraryId `smh2ws7gv815z8r3`）
-3. 找到「空间管理」/「Space」列表
-4. 复制任意一个空间的 **spaceID**（通常形如 `space-xxxxxxxx` 或纯字母数字串）
-5. 若没有空间，点「新建空间」创建一个，例如命名 `agstest`
-
-**方式 B：告诉我，我来找**
-
-如果你确认空间已存在，我可以尝试：
-- 用 LibrarySecret 通过 SMH 业务面 API 签名查询（需要我逆向签名算法，耗时）
-- 或你直接在控制台截图/复制给我
-
-**你需要回填给我：**
-
-```
-AGENTBUCKET_LIBRARY_ID=smh2ws7gv815z8r3
-AGENTBUCKET_SPACE_ID=<你的 spaceID>
-```
-
-### 1.4 若需新建 Role（当前不必要）
-
-现有 `ags-tcr-full` 已关联 `AdministratorAccess`，SMH 权限已覆盖。**无需新建。**
-
-如果你想遵循最小权限原则，可新建专用 Role：
-
-1. 打开 [CAM 角色控制台](https://console.cloud.tencent.com/cam/role) → 「新建角色」→ 「腾讯云服务」
-2. 角色载体选择 **Agent 沙箱服务（ags）**（若列表中没有，选「自定义创建」并填入信任主体）
-3. 信任策略应为：
+1. [CAM 角色控制台](https://console.cloud.tencent.com/cam/role) → 「新建角色」→ 「腾讯云服务」
+2. 角色载体选择 **Agent 沙箱服务（ags）**
+3. 信任策略：
    ```json
    {
      "version": "2.0",
@@ -88,16 +73,12 @@ AGENTBUCKET_SPACE_ID=<你的 spaceID>
      ]
    }
    ```
-4. 关联预设策略：
-   - **`QcloudSMHFullAccess`**（必须，AgentBucket 依赖）
-   - `QcloudTCRFullAccess`（镜像来自 TCR 时）
-5. 记录完整 ARN：`qcs::cam::uin/100008634787:roleName/<角色名>`
-
-**回填：** `AGS_ROLE_ARN=qcs::cam::uin/100008634787:roleName/<角色名>`
+4. 关联预设策略 **`QcloudSMHFullAccess`**（必须）；镜像来自 TCR 时另加 `QcloudTCRFullAccess`
+5. ARN 格式：`qcs::cam::uin/<UIN>:roleName/<角色名>`
 
 ---
 
-## 二、AgentCFS —— 需要新建
+## 二、AgentCFS —— ⏸ 待创建挂载点
 
 ### 2.1 排查结论（我已验证）
 
@@ -112,20 +93,36 @@ AGENTBUCKET_SPACE_ID=<你的 spaceID>
 
 **全部是普通 NFS，不是 AgentCFS。**
 
-> ## ✅ 更新（2026-09-19）：无需新建 AgentCFS
->
-> 实测结论：**普通 NFS 型 CFS（`cfs-cunkkj23`）可直接被 AGS 接受并正常挂载读写**。
-> 已用 `cfs-cunkkj23` 完成 TC-04 全部用例，包括：
-> 挂载（`virtiofs`）、目录创建、文件读写、跨实例持久化、`subPath` 隔离、`MountPath` 覆盖。
->
-> 因此**不需要**创建「Agent 文件系统」，可省去 10TiB / 20TiB 起购成本。
-> 下方创建步骤仅在你希望使用 AgentCFS 独有能力（如休眠态 TurboS3 访问）时才需要。
+### 2.2 两种可行路径（2026-09-19 更新）
+
+**路径 A（已验证可用，无需额外开销）**：普通 NFS 型 CFS
+实测 `cfs-cunkkj23`（NFS）可直接被 AGS 接受并正常挂载读写，TC-04 全部用例
+（挂载 / 读写 / 跨实例持久化 / subPath 隔离 / MountPath 覆盖）均已通过。
+
+**路径 B（用户指定的专用 AgentCFS）**：`cfs-45a313f3e`
+- 类型：`protocol=TURBO`、`storage=TP`、zone `ap-beijing-6`、名称 `cedricbwang`
+- **当前无挂载点**，AGS 报 `no mount targets found for CFS`
+- ⚠️ CFS 的 PaaS API **不提供创建挂载点的接口**（全套 54 个 action 中无 `CreateMountTarget`），
+  只能在控制台操作
+
+### 2.3 如何为 `cfs-45a313f3e` 创建挂载点
+
+1. 打开 [文件存储控制台](https://console.cloud.tencent.com/cfs)
+2. 找到 `cfs-45a313f3e`（名称 `cedricbwang`）
+3. 进入「挂载点」页签 → 「添加挂载点」
+4. 选择**与沙箱互通的 VPC**，推荐：
+   - VPC：`vpc-ovochv3a`
+   - 子网：`subnet-pac3o08j`（ap-beijing-8）
+   - 权限组：默认放通
+5. 创建后可用 `python3 scripts/check_readiness.py` 确认
+
+> 注意：TURBO 型 CFS 可能对可用区/VPC 有额外约束，若创建失败请按控制台提示调整。
 
 > 现有文件系统中 `cfs-cunkkj23`（jw-test）容量为 0 且看起来是测试用途。
 > 如果你希望避免新建成本，可以让我先**试挂一个普通 NFS**看 AGS 是否接受 —— 
 > 但按官方文档，应该只有 Agent 文件系统可用。
 
-### 2.2 创建步骤（控制台）
+### 2.4（可选）新建 AgentCFS 的完整步骤
 
 1. 打开 [文件存储控制台](https://console.cloud.tencent.com/cfs) → 单击「新建」
 
@@ -161,7 +158,7 @@ AGENTCFS_FILE_SYSTEM_ID=cfs-xxxxxxxx
 AGENTCFS_PATH=/            # 或 /agstest
 ```
 
-### 2.3 权限
+### 2.5 权限
 
 若复用 `ags-tcr-full`（已含 `AdministratorAccess`），CFS 权限已覆盖，**无需额外配置**。
 
@@ -171,20 +168,24 @@ AGENTCFS_PATH=/            # 或 /agstest
 
 ---
 
-## 三、回填清单（复制到 `/root/ags/.env`）
+## 三、当前 `.env` 配置
 
 ```bash
-# AgentBucket（只需补 spaceID）
+# AgentBucket —— 已就绪，TC-02 已通过
 AGS_ROLE_ARN=qcs::cam::uin/100008634787:roleName/ags-tcr-full
-AGENTBUCKET_LIBRARY_ID=smh2ws7gv815z8r3
-AGENTBUCKET_SPACE_ID=<待填>
+AGENTBUCKET_LIBRARY_ID=smh3qv6cmcoscm4i
+AGENTBUCKET_SPACE_ID=space3ly9r9ni7fhju
+AGENTBUCKET_LIBRARY_SECRET=<见本地 .env>
 
-# AgentCFS（需新建后回填）
-AGENTCFS_FILE_SYSTEM_ID=<待填>
+# AgentCFS —— 已指定，待创建挂载点
+AGENTCFS_FILE_SYSTEM_ID=cfs-45a313f3e
 AGENTCFS_PATH=/
+
+# 被测镜像 —— 待推送
+AGT_IMAGE=euson-tcr.tencentcloudcr.com/cedricbwang/test:v1
 ```
 
-回填后告诉我，我会立刻跑 TC-02 / TC-03。
+就绪后用 `python3 scripts/check_readiness.py --e2e` 验证。
 
 ---
 
@@ -199,6 +200,9 @@ AGENTCFS_PATH=/
 | Subnet | `subnet-pac3o08j`（ap-beijing-8, 172.21.128.0/20，**已挂 NAT 可出网**） |
 | Security Group | `sg-p3sxc9y3`（`agstest-sg`，放通全出入站）**← 我新建的** |
 | CAM Role | `ags-tcr-full`（`AdministratorAccess` + `QcloudTCRFullAccess`，信任 `ags.cloud.tencent.com`） |
-| 镜像 | `euson-tcr.tencentcloudcr.com/sandbox/sandbox:v1`（1.79GB，内置 `/usr/bin/envd`，Python 3.12.13） |
+| 已验证镜像 | `euson-tcr.tencentcloudcr.com/sandbox/sandbox:v1`（1.79GB，内置 `/usr/bin/envd`，Python 3.12.13） |
+| 待验证镜像 | `euson-tcr.tencentcloudcr.com/cedricbwang/test:v1`（用户提供，仓库当前为空） |
+| 已验证 CFS | `cfs-cunkkj23`（NFS，TC-04 已通过） |
+| 待验证 CFS | `cfs-45a313f3e`（TURBO，缺挂载点） |
 | envd 启动命令 | `/usr/bin/envd -port 49983`（健康检查 `/health` 返回 204） |
 | TCR | 实例 `tcr-mvlaq1sq`，域名 `euson-tcr.tencentcloudcr.com` |

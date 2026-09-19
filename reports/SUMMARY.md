@@ -162,8 +162,15 @@ AGS received the provider result`。经逐项定位，真实根因是**五个独
 | TC-02-7 | 实例级只读收紧 | ✅ | `readOnly=true` 后写入被拒 |
 | TC-02-8 | 负例：不存在的 spaceID | ✅ | 实例可启动但目录访问报 `No such file or directory`（与文档一致） |
 
-**复用资源**：SMH Library `smh2ws7gv815z8r3`（`leotestforkimi`，多空间），
-spaceID `space2qq0z835d4ocj`（通过 SMH 业务面 API `/api/v1/space/{lib}/list` 自动发现）。
+**使用资源**（用户提供）：
+- SMH Library：`smh3qv6cmcoscm4i`（`cedricbwang-agentbucket`，`IsMultiSpace=true`、
+  `BucketRegion=ap-beijing`）—— 满足 `subPath=spaceID` 模式对多空间的要求
+- spaceID：`space3ly9r9ni7fhju`（该库共 2 个空间，取第一个）
+- 获取方式：`GET /api/v1/token?library_id=<lib>&library_secret=<secret>&grant=admin`
+  → `GET /api/v1/space/{lib}/list?access_token=<token>`
+
+**结论**：8 个用例 17 个检查点全部通过，AgentBucket 功能在用户自建媒体库上表现正常，
+包括跨实例持久化（TC-02-5）与实例级只读收紧（TC-02-7）。
 
 产物：`scripts/tc02_agentbucket.py`、`reports/TC-02.md`、8 个用例文档
 

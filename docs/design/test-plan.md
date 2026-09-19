@@ -114,7 +114,7 @@
 ### TC-02 AgentBucket 使用 —— 档位 B ✅ 已完成
 - **依据**：`docs/requirements/agentbucket.md` + 官方文档 137731
 - **已完成 8 个用例**：见 `reports/TC-02.md`
-- **实测资源**：LibraryId `smh2ws7gv815z8r3`、spaceID `space2qq0z835d4ocj`
+- **使用资源**：LibraryId `smh3qv6cmcoscm4i`（`cedricbwang-agentbucket`）、spaceID `space3ly9r9ni7fhju`
   （通过 SMH 业务面 `GET /api/v1/space/{libraryId}/list` 自动发现）
 
 ### TC-03 Agent Engine（弹性部署 Deployment）—— 档位 B ✅ 已完成

@@ -74,6 +74,7 @@ class Config:
     role_arn: str | None = field(default_factory=lambda: env("AGS_ROLE_ARN"))
     bucket_library_id: str | None = field(default_factory=lambda: env("AGENTBUCKET_LIBRARY_ID"))
     bucket_space_id: str | None = field(default_factory=lambda: env("AGENTBUCKET_SPACE_ID"))
+    bucket_library_secret: str | None = field(default_factory=lambda: env("AGENTBUCKET_LIBRARY_SECRET"))
     cfs_file_system_id: str | None = field(default_factory=lambda: env("AGENTCFS_FILE_SYSTEM_ID"))
     cfs_path: str = field(default_factory=lambda: env("AGENTCFS_PATH", "/") or "/")
 

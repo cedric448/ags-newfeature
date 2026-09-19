@@ -91,8 +91,8 @@ cp .env.example .env
 | `E2B_API_KEY` / `E2B_DOMAIN` | E2B 数据面 |
 | `AGS_ROLE_ARN` | CAM 角色（拉镜像 / 访问存储） |
 | `AGS_VPC_ID` / `AGS_SUBNET_ID` / `AGS_SECURITY_GROUP_ID` | VPC 模式必需 |
-| `AGT_IMAGE` | 被测沙箱镜像（须含 envd） |
-| `AGENTBUCKET_LIBRARY_ID` / `AGENTBUCKET_SPACE_ID` | AgentBucket |
+| `AGT_IMAGE` / `AGT_ENVD_PATH` | 被测沙箱镜像及其 envd 路径 |
+| `AGENTBUCKET_LIBRARY_ID` / `_SPACE_ID` / `_LIBRARY_SECRET` | AgentBucket |
 | `AGENTCFS_FILE_SYSTEM_ID` / `AGENTCFS_PATH` | AgentCFS |
 
 ### 3. 就绪检查
@@ -153,14 +153,30 @@ python3 scripts/tc04_agentcfs.py                                    # 北京，V
 
 ---
 
-## 已知阻塞项
+## 已配置的被测资源
 
-| 项 | 状态 | 说明 |
+| 资源 | 值 | 状态 |
 |---|---|---|
-| 被测镜像 | ⏸ 待提供 | `euson-tcr.tencentcloudcr.com/cedricbwang/test:v1` 仓库为空（0 个 tag） |
-| `cfs-45a313f3e` 挂载点 | ⏸ 待创建 | 该 AgentCFS（TURBO 型）无挂载点，PaaS API 不提供创建接口，需在控制台操作 |
+| AgentBucket 媒体库 | `smh3qv6cmcoscm4i`（`cedricbwang-agentbucket`，多空间） | ✅ TC-02 已通过 |
+| AgentBucket 空间 | `space3ly9r9ni7fhju` | ✅ |
+| AgentCFS | `cfs-45a313f3e`（TURBO 型） | ⏸ 缺挂载点 |
+| 被测镜像 | `euson-tcr.tencentcloudcr.com/cedricbwang/test:v1` | ⏸ 仓库为空 |
+| 已验证镜像 | `euson-tcr.tencentcloudcr.com/sandbox/sandbox:v1` | ✅ TC-01 已通过 |
+| 已验证 CFS | `cfs-cunkkj23`（NFS） | ✅ TC-04 已通过 |
 
-用 `scripts/check_readiness.py` 可随时确认这两项是否已就绪。
+### 待办
+
+| 项 | 说明 |
+|---|---|
+| 推送被测镜像 | `cedricbwang/test:v1` 仓库当前 0 个 tag；该 namespace 为私有，还需确认角色拉取权限 |
+| 创建 CFS 挂载点 | `cfs-45a313f3e` 无挂载点；CFS PaaS API 无 `CreateMountTarget`，需在控制台添加（建议 `vpc-ovochv3a` / `subnet-pac3o08j`） |
+
+用 `scripts/check_readiness.py` 可随时确认这两项是否已就绪：
+
+```bash
+python3 scripts/check_readiness.py        # 只检查
+python3 scripts/check_readiness.py --e2e  # 检查 + 端到端冒烟
+```
 
 ---
 
