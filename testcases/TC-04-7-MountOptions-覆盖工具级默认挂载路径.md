@@ -3,9 +3,10 @@
 | 项 | 值 |
 |---|---|
 | 结论 | **PASS** |
-| 执行时间 | 2026-09-19 15:31:52 |
-| 耗时 | 4.8s |
+| 执行时间 | 2026-09-19 15:39:47 |
+| 耗时 | 5.2s |
 | 网络模式 | VPC |
+| 被测镜像 | `euson-tcr.tencentcloudcr.com/sandbox/sandbox:v1` |
 
 ## 测试目的
 
@@ -19,7 +20,7 @@ TC-04-3 已验证工具级默认路径 /mnt/cfs
 
 | # | 步骤 | 结论 | 耗时 | 说明 |
 |---|------|------|------|------|
-| 1 | 带 MountPath 覆盖启动实例 | ✅ PASS | 0.0s | InstanceId=ce3ixrn3e5vqqtv7lqffcg3wgwm3hduhzsaiirnw |
+| 1 | 带 MountPath 覆盖启动实例 | ✅ PASS | 0.0s | InstanceId=xgwnwvki6xrv3su7cnkh3vzge4r42utgdtbnwrhk |
 | 2 | 覆盖后的路径可用 | ✅ PASS | 0.0s | /mnt/cfs-alt 可写 |
 
 ### 证据 1: 带 MountPath 覆盖启动实例
@@ -39,7 +40,7 @@ TC-04-3 已验证工具级默认路径 /mnt/cfs
 
 ```
 {
-  "stdout": "--- new path ---\nFilesystem         Type      Size  Used Avail Use% Mounted on\nvirtio_rw_44e51c2a virtiofs  500M  140M  361M  28% /mnt/cfs-alt\n--- old path ---\nls: cannot access '/mnt/cfs': No such file or directory\n--- write at new path ---\nOK\n",
+  "stdout": "--- new path ---\nFilesystem         Type      Size  Used Avail Use% Mounted on\nvirtio_rw_44e51c2a virtiofs  500M  128M  373M  26% /mnt/cfs-alt\n--- old path ---\nls: cannot access '/mnt/cfs': No such file or directory\n--- write at new path ---\nOK\n",
   "stderr": ""
 }
 ```

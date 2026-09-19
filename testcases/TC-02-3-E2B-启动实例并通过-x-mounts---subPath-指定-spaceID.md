@@ -3,9 +3,10 @@
 | 项 | 值 |
 |---|---|
 | 结论 | **PASS** |
-| 执行时间 | 2026-09-19 15:25:42 |
-| 耗时 | 13.9s |
+| 执行时间 | 2026-09-19 15:41:11 |
+| 耗时 | 12.6s |
 | 网络模式 | VPC |
+| 被测镜像 | `euson-tcr.tencentcloudcr.com/cedricbwang/test:v1` |
 
 ## 测试目的
 
@@ -13,20 +14,20 @@
 
 ## 前置条件
 
-工具 agstest-tc02-1789802720 已 ACTIVE；spaceID=space3ly9r9ni7fhju
+工具 agstest-tc02-1789803654 已 ACTIVE；spaceID=space3ly9r9ni7fhju
 
 ## 测试步骤与结果
 
 | # | 步骤 | 结论 | 耗时 | 说明 |
 |---|------|------|------|------|
-| 1 | E2B 创建沙箱实例 | ✅ PASS | 0.0s | sandbox_id=mdhc5wdcgoz7pd2x6osbg6gxlquirqx7jyrkwaff |
+| 1 | E2B 创建沙箱实例 | ✅ PASS | 0.0s | sandbox_id=j2ajv7goy3fqqmckcheazmesffnr3cq5klpe5ghm |
 | 2 | 挂载点存在且可创建目录并写入 | ✅ PASS | 0.0s | exit=0，写入成功 |
 
 ### 证据 2: 挂载点存在且可创建目录并写入
 
 ```
 {
-  "stdout": "--- mount listing ---\nvirtio_rw_44e51c2a on /mnt/data/agentbucket-alt type virtiofs (rw,relatime)\n--- df ---\nFilesystem         Type      Size  Used Avail Use% Mounted on\nvirtio_rw_44e51c2a virtiofs  500M  465M   36M  93% /mnt/data/agentbucket-alt\n--- mkdir+write ---\nhello-bucket\n",
+  "stdout": "--- mount listing ---\nvirtio_rw_44e51c2a on /mnt/data/agentbucket-alt type virtiofs (rw,relatime)\n--- df ---\nFilesystem         Type      Size  Used Avail Use% Mounted on\nvirtio_rw_44e51c2a virtiofs  500M  113M  388M  23% /mnt/data/agentbucket-alt\n--- mkdir+write ---\nhello-bucket\n",
   "stderr": ""
 }
 ```

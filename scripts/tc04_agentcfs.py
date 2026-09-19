@@ -73,8 +73,9 @@ def main() -> int:
     case1 = rec.case(
         "TC-04-1", "创建挂载 CFS 的 custom 工具",
         purpose=f"验证 StorageSource.Cfs（FileSystemId={fs_id}, Path={CFG.cfs_path}）能被 AGS 接受，工具变为 ACTIVE 且回查配置一致。",
-        prereq=f"CFS {fs_id} 在 {CFG.region} 可用；RoleArn 具备 CFS 权限",
+        prereq=f"CFS {fs_id} 在 {CFG.region} 可用（挂载点已建）；RoleArn 具备 CFS 权限",
         network="VPC",
+        image=IMAGE,
     )
     try:
         payload = cfs_tool(ags, tool_name, fs_id, CFG.cfs_path)
@@ -108,6 +109,7 @@ def main() -> int:
         ),
         prereq="同 TC-04-1",
         network="VPC",
+            image=IMAGE,
     )
     bad_name = f"{CFG.run_prefix}-tc04-badpath-{ts}"
     bad_path = f"/agstest-nonexistent-{ts}"
@@ -144,6 +146,7 @@ def main() -> int:
         purpose=f"启动实例，确认 {MOUNT_PATH} 已挂载为 CFS，并以 root 身份完成目录创建与文件读写。",
         prereq=f"工具 {tool_name} 已 ACTIVE",
         network="VPC",
+            image=IMAGE,
     )
     try:
         inst_id = ags.start_instance_id({"ToolName": tool_name, "Timeout": "15m"})
@@ -187,6 +190,7 @@ def main() -> int:
         purpose="kill 当前实例，启动一个全新实例挂载同一 CFS（同 FileSystemId + Path），验证数据仍可读。",
         prereq="TC-04-3 已写入数据",
         network="VPC",
+            image=IMAGE,
     )
     first_id = sbx.sandbox_id
     E2B.kill(sbx)
@@ -210,6 +214,7 @@ def main() -> int:
         purpose="同一工具、同一 StorageMount.Name，通过 MountOptions.SubPath 指定子目录，应映射到 CFS 内的不同目录，互相看不到数据。",
         prereq="TC-04-4 已在根目录写入数据",
         network="VPC",
+            image=IMAGE,
     )
     try:
         inst2 = ags.start_instance_id({
@@ -243,6 +248,7 @@ def main() -> int:
         ),
         prereq="工具级 StorageMount.ReadOnly=false",
         network="VPC",
+            image=IMAGE,
     )
     try:
         ro_tool = f"{CFG.run_prefix}-tc04-ro-{ts}"
@@ -292,6 +298,7 @@ def main() -> int:
         purpose=f"启动实例时通过 MountOptions.MountPath 把工具级默认 {MOUNT_PATH} 覆盖为 {MOUNT_PATH_ALT}，验证实例内挂载点变更。",
         prereq=f"TC-04-3 已验证工具级默认路径 {MOUNT_PATH}",
         network="VPC",
+            image=IMAGE,
     )
     try:
         oinst = ags.start_instance_id({

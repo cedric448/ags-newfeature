@@ -159,7 +159,7 @@ python3 scripts/tc04_agentcfs.py                                    # 北京，V
 |---|---|---|
 | AgentBucket 媒体库 | `smh3qv6cmcoscm4i`（`cedricbwang-agentbucket`，多空间） | ✅ TC-02 已通过 |
 | AgentBucket 空间 | `space3ly9r9ni7fhju` | ✅ |
-| AgentCFS | `cfs-45a313f3e`（TURBO 型，挂载点已建） | ✅ TC-04 已通过 |
+| AgentCFS | `cfs-45a313f3e`（AgentSandbox TURBO 型，`vpc-ovochv3a` 接入点 `cfss3endpoint-316d6f51`） | ✅ TC-04 已通过 |
 | 被测镜像 | `euson-tcr.tencentcloudcr.com/cedricbwang/test:v1` | ⏸ 仓库为空 |
 | 已验证镜像 | `euson-tcr.tencentcloudcr.com/sandbox/sandbox:v1` | ✅ TC-01 已通过 |
 | 备用 CFS | `cfs-cunkkj23`（NFS） | ✅ 早期验证 |

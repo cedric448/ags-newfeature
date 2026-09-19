@@ -101,11 +101,13 @@ AGENTBUCKET_LIBRARY_SECRET=<见本地 .env，勿提交>
 
 **路径 B（用户指定的专用 AgentCFS，当前使用）**：`cfs-45a313f3e` ✅ 已就绪
 - 类型：`protocol=TURBO`、`storage=TP`、zone `ap-beijing-6`、名称 `cedricbwang`
-- 挂载点：`5a313f3e`，`vpc-j5tuypwg` / `subnet-amedci6t`
+- 特性：`Scenario=AgentSandbox`、`Protocol=TURBO`、`StorageType=TP`、`Version=v4.0`
+- 挂载点 `5a313f3e`：网络接口类型 `CCN`，`vpc-j5tuypwg` / `subnet-amedci6t` / `30.1.0.16`
+- 用户另在 `vpc-ovochv3a`（与测试沙箱同 VPC）创建挂载点，接入点 ID `cfss3endpoint-316d6f51`
 - **实测可用**：TC-04 全部用例通过（13/14，唯一失败项为 BUG-01 功能缺陷）
 
-> 提示：该挂载点位于 `vpc-j5tuypwg`，而测试沙箱在 `vpc-ovochv3a`，
-> **跨 VPC 场景下挂载依然正常**，说明 AGS 侧通过挂载点 IP 直连、不要求同 VPC。
+> 观测结论：无论挂载点在**跨 VPC（CCN 路径）**还是**同 VPC**，沙箱侧挂载表现一致，
+> 均为 `virtiofs`、可正常读写，说明 AGS 通过挂载点内网 IP 直连 CFS。
 
 ### 2.3（备查）挂载点的创建方式
 

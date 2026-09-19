@@ -3,9 +3,10 @@
 | 项 | 值 |
 |---|---|
 | 结论 | **PASS** |
-| 执行时间 | 2026-09-19 15:25:55 |
-| 耗时 | 0.9s |
+| 执行时间 | 2026-09-19 15:41:23 |
+| 耗时 | 0.6s |
 | 网络模式 | VPC |
+| 被测镜像 | `euson-tcr.tencentcloudcr.com/cedricbwang/test:v1` |
 
 ## 测试目的
 
@@ -19,7 +20,7 @@
 
 | # | 步骤 | 结论 | 耗时 | 说明 |
 |---|------|------|------|------|
-| 1 | 实例仍能启动 | ✅ PASS | 0.0s | sandbox_id=5yfywvpyshiqrqsaxli4m7ksjpunwwfjvbqivk7s |
+| 1 | 实例仍能启动 | ✅ PASS | 0.0s | sandbox_id=mj5h42h5mfskfz6547zp5fce2p6xwbkelfdkfwyt |
 | 2 | 记录挂载目录访问结果 | ✅ PASS | 0.0s | exit=0 |
 
 ### 证据 2: 记录挂载目录访问结果

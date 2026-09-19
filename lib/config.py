@@ -77,6 +77,7 @@ class Config:
     bucket_library_secret: str | None = field(default_factory=lambda: env("AGENTBUCKET_LIBRARY_SECRET"))
     cfs_file_system_id: str | None = field(default_factory=lambda: env("AGENTCFS_FILE_SYSTEM_ID"))
     cfs_path: str = field(default_factory=lambda: env("AGENTCFS_PATH", "/") or "/")
+    cfs_endpoint_id: str | None = field(default_factory=lambda: env("AGENTCFS_ENDPOINT_ID"))
 
     # --- 测试开关 ---
     run_prefix: str = field(default_factory=lambda: env("AGS_TEST_PREFIX", "agstest") or "agstest")

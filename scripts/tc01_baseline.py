@@ -68,6 +68,7 @@ def main() -> int:
         ),
         prereq=f"腾讯云凭据可用；TCR 镜像可访问；网络模式 {net_label}",
         network=net_label,
+        image=image,
     )
     ags = AgsApi()
     cleanup = CleanupRegistry(keep=CFG.keep_resources)

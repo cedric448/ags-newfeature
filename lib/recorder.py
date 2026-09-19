@@ -49,13 +49,14 @@ class Case:
     """单个测试用例：记录步骤、断言、证据与附件。"""
 
     def __init__(self, case_id: str, title: str, recorder: "Recorder", *, purpose: str = "",
-                 prereq: str = "", network: str = ""):
+                 prereq: str = "", network: str = "", image: str = ""):
         self.case_id = case_id
         self.title = title
         self.recorder = recorder
         self.purpose = purpose
         self.prereq = prereq
         self.network = network
+        self.image = image
         self.steps: list[Step] = []
         self.attachments: list[tuple[str, str]] = []  # (说明, 文件路径)
         self.notes: list[str] = []
@@ -146,6 +147,8 @@ class Case:
         lines.append(f"| 耗时 | {self.duration:.1f}s |")
         if self.network:
             lines.append(f"| 网络模式 | {self.network} |")
+        if self.image:
+            lines.append(f"| 被测镜像 | `{self.image}` |")
         lines.append("")
         if self.purpose:
             lines.append(f"## 测试目的\n\n{self.purpose}\n")

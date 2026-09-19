@@ -112,6 +112,8 @@ def check_cfs() -> bool:
         print(f"  {NG} 未配置 AGENTCFS_FILE_SYSTEM_ID")
         return False
     print(f"  FileSystemId = {fs}  Path = {CFG.cfs_path}")
+    if CFG.cfs_endpoint_id:
+        print(f"  接入点 ID    = {CFG.cfs_endpoint_id}")
     cred = credential.Credential(CFG.secret_id, CFG.secret_key)
     c = cfs_client.CfsClient(cred, "ap-beijing",
                              ClientProfile(httpProfile=HttpProfile(endpoint="cfs.tencentcloudapi.com")))

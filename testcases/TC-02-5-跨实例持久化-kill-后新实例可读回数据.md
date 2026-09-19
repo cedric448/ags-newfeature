@@ -3,9 +3,10 @@
 | 项 | 值 |
 |---|---|
 | 结论 | **PASS** |
-| 执行时间 | 2026-09-19 15:25:47 |
-| 耗时 | 9.5s |
+| 执行时间 | 2026-09-19 15:41:15 |
+| 耗时 | 8.8s |
 | 网络模式 | VPC |
+| 被测镜像 | `euson-tcr.tencentcloudcr.com/cedricbwang/test:v1` |
 
 ## 测试目的
 
@@ -19,5 +20,5 @@ TC-02-4 已成功写入数据
 
 | # | 步骤 | 结论 | 耗时 | 说明 |
 |---|------|------|------|------|
-| 1 | 两次实例 sandbox_id 不同 | ✅ PASS | 0.0s | mdhc5wdcgoz7pd2x6osbg6gxlquirqx7jyrkwaff != vu7ptfli2qjf35g6yrm5owp6st34t3t2pjctb7yt |
-| 2 | 新实例读回 AgentBucket 数据 | ✅ PASS | 0.0s | 读到 agentbucket-payload-1789802720 |
+| 1 | 两次实例 sandbox_id 不同 | ✅ PASS | 0.0s | j2ajv7goy3fqqmckcheazmesffnr3cq5klpe5ghm != wugtvw7lirikfbfaqxna2xk5th3lt5fmov6zre24 |
+| 2 | 新实例读回 AgentBucket 数据 | ✅ PASS | 0.0s | 读到 agentbucket-payload-1789803654 |

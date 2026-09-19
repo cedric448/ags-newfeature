@@ -3,9 +3,10 @@
 | 项 | 值 |
 |---|---|
 | 结论 | **PASS** |
-| 执行时间 | 2026-09-19 15:25:42 |
-| 耗时 | 13.9s |
+| 执行时间 | 2026-09-19 15:41:11 |
+| 耗时 | 12.6s |
 | 网络模式 | VPC |
+| 被测镜像 | `euson-tcr.tencentcloudcr.com/cedricbwang/test:v1` |
 
 ## 测试目的
 
@@ -24,5 +25,5 @@
 ### 证据 1: 返回 MissingParameter 类错误
 
 ```
-[MissingParameter] [TencentCloudSDKException] code:MissingParameter message:CustomConfiguration.Probe is required requestId:bbcf18b7-d1b4-4d44-b85c-434faa187855 (RequestId: bbcf18b7-d1b4-4d44-b85c-434faa187855)
+[MissingParameter] [TencentCloudSDKException] code:MissingParameter message:CustomConfiguration.Probe is required requestId:51865c8a-1d0b-4e2f-ab58-2232d0ce46ca (RequestId: 51865c8a-1d0b-4e2f-ab58-2232d0ce46ca)
 ```

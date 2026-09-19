@@ -216,8 +216,10 @@ AGS received the provider result`。经逐项定位，真实根因是**五个独
 
 **使用资源**（用户提供）：`cfs-45a313f3e`（名称 `cedricbwang`）
 - 类型：`protocol=TURBO`、`storage=TP`、zone `ap-beijing-6` —— 真正的 AgentCFS
-- 挂载点：`5a313f3e`，`vpc-j5tuypwg` / `subnet-amedci6t` / `10.x` 内网 IP
-- 实测：跨 VPC 场景下仍可正常挂载读写（沙箱在 `vpc-ovochv3a`）
+- `Scenario: AgentSandbox` —— 面向 Agent 沙箱场景的专用文件系统
+- 挂载点：`5a313f3e`（`CCN` 网络接口，`vpc-j5tuypwg` / `subnet-amedci6t`，`30.1.0.16`）
+- 用户另在 `vpc-ovochv3a`（与沙箱同 VPC）挂载，接入点 `cfss3endpoint-316d6f51`
+- 实测两种网络路径下挂载读写均正常
 
 **结论**：7 个用例 13/14 检查点通过。**BUG-01 在用户的 AgentCFS 上同样复现**，
 进一步确认该缺陷与具体 CFS 实例无关，属功能实现问题。

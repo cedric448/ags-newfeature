@@ -91,8 +91,9 @@ def main() -> int:
     case = rec.case(
         "TC-02-1", "创建带 AgentBucket 的 code-interpreter 工具",
         purpose="验证按 E2B subPath=spaceID 模式创建工具：只传 LibraryId、不传 SpaceId，工具应变为 ACTIVE 且回查 LibraryId 一致。",
-        prereq=f"SMH LibraryId={lib}；RoleArn 具备 QcloudSMHFullAccess；VPC={CFG.vpc_id}",
+        prereq=f"SMH LibraryId={lib}；spaceID={space}；RoleArn 具备 QcloudSMHFullAccess；VPC={CFG.vpc_id}",
         network="VPC",
+        # code-interpreter 类型不涉及自定义镜像，故不标注
     )
     try:
         payload = create_bucket_tool(ags, tool_name, "code-interpreter", with_probe=False)
@@ -126,6 +127,7 @@ def main() -> int:
         purpose="验证 CustomConfiguration.Probe 为必填，缺失时云 API 返回 MissingParameter.CustomConfiguration.Probe。",
         prereq="同 TC-02-1",
         network="VPC",
+            image=CFG.image,
     )
     bad_name = f"{CFG.run_prefix}-tc02-noprobe-{ts}"
     try:
@@ -143,6 +145,7 @@ def main() -> int:
         purpose=f"验证 metadata.x-mounts[].subPath 传 spaceID、mountPath 覆盖工具级默认值（{MOUNT_PATH} → {MOUNT_PATH_ALT}）。",
         prereq=f"工具 {tool_name} 已 ACTIVE；spaceID={space}",
         network="VPC",
+            image=CFG.image,
     )
     try:
         sbx1 = E2B.create(tool_name, timeout=600,
@@ -173,6 +176,7 @@ def main() -> int:
         purpose="验证 files.write / files.read / files.list / files.exists 在 AgentBucket 挂载目录上均可用。",
         prereq="实例已挂载 AgentBucket",
         network="VPC",
+            image=CFG.image,
     )
     marker = f"agentbucket-payload-{ts}"
     target = f"{MOUNT_PATH_ALT}/agstest/file-api.txt"
@@ -204,6 +208,7 @@ def main() -> int:
         purpose="kill 第一个实例，启动全新实例（同 StorageMount.Name + 同 subPath），验证数据由 AgentBucket 持久化、不依赖单实例生命周期。",
         prereq="TC-02-4 已成功写入数据",
         network="VPC",
+            image=CFG.image,
     )
     first_id = sbx1.sandbox_id if sbx1 else None
     E2B.kill(sbx1)
@@ -228,6 +233,7 @@ def main() -> int:
         purpose="同一工具、同一 StorageMount.Name，换一个 subPath 启动实例，应看不到 TC-02-5 写入的文件。",
         prereq="TC-02-5 已在 spaceID A 写入数据",
         network="VPC",
+            image=CFG.image,
     )
     other_space = f"{space}-alt"
     try:
@@ -249,6 +255,7 @@ def main() -> int:
         purpose="工具级可写的前提下，实例级 metadata.x-mounts[].readOnly=true 应把挂载收紧为只读，写入失败。",
         prereq="工具级 StorageMount 未设置 ReadOnly",
         network="VPC",
+            image=CFG.image,
     )
     try:
         ro = E2B.create(tool_name, timeout=600,
@@ -270,6 +277,7 @@ def main() -> int:
         purpose="文档说明：传入不存在的 spaceID 时实例仍可启动，但挂载目录不会被创建/访问报 no such file or directory。",
         prereq="同 TC-02-3",
         network="VPC",
+            image=CFG.image,
     )
     try:
         bad = E2B.create(tool_name, timeout=600,

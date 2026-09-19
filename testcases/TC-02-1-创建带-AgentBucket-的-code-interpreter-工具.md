@@ -3,8 +3,8 @@
 | 项 | 值 |
 |---|---|
 | 结论 | **PASS** |
-| 执行时间 | 2026-09-19 15:25:20 |
-| 耗时 | 36.6s |
+| 执行时间 | 2026-09-19 15:40:54 |
+| 耗时 | 30.0s |
 | 网络模式 | VPC |
 
 ## 测试目的
@@ -13,13 +13,13 @@
 
 ## 前置条件
 
-SMH LibraryId=smh3qv6cmcoscm4i；RoleArn 具备 QcloudSMHFullAccess；VPC=vpc-ovochv3a
+SMH LibraryId=smh3qv6cmcoscm4i；spaceID=space3ly9r9ni7fhju；RoleArn 具备 QcloudSMHFullAccess；VPC=vpc-ovochv3a
 
 ## 测试步骤与结果
 
 | # | 步骤 | 结论 | 耗时 | 说明 |
 |---|------|------|------|------|
-| 1 | CreateSandboxTool (code-interpreter) | ✅ PASS | 0.0s | ToolId=sdt-5a2wdyvc |
+| 1 | CreateSandboxTool (code-interpreter) | ✅ PASS | 0.0s | ToolId=sdt-9nnj4qug |
 | 2 | 等待工具 ACTIVE | ✅ PASS | 0.0s | Status=ACTIVE |
 | 3 | 回查 LibraryId 与请求一致 | ✅ PASS | 0.0s | LibraryId=smh3qv6cmcoscm4i |
 | 4 | 创建工具阶段未回填 SpaceId | ✅ PASS | 0.0s | 确认未传 SpaceId |
@@ -28,8 +28,8 @@ SMH LibraryId=smh3qv6cmcoscm4i；RoleArn 具备 QcloudSMHFullAccess；VPC=vpc-ov
 
 ```
 {
-  "ToolId": "sdt-5a2wdyvc",
-  "RequestId": "3da2d7fe-0c7e-47ed-a4f7-dc331512cc63"
+  "ToolId": "sdt-9nnj4qug",
+  "RequestId": "e4562a08-9831-4712-a618-5e7190dc76d5"
 }
 ```
 
