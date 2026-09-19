@@ -1,0 +1,14 @@
+# 敏感信息
+.env
+
+# 运行时产物
+reports/artifacts/
+__pycache__/
+*.pyc
+.venv/
+venv/
+
+# 编辑器
+.vscode/
+.idea/
+.DS_Store
