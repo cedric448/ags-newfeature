@@ -47,6 +47,8 @@
 │   ├── tc02_agentbucket.py    # TC-02 AgentBucket（8 用例）
 │   ├── tc03_agent_engine.py   # TC-03 Agent Engine（9 用例）
 │   └── tc04_agentcfs.py       # TC-04 AgentCFS（7 用例）
+├── image/
+│   └── dsh/                   # DeepSeek Harness 自定义镜像（Dockerfile + entrypoint + 说明）
 ├── lib/                       # 公共库
 │   ├── config.py              # 配置与环境变量
 │   ├── ags_api.py             # 腾讯云 AGS 控制面封装
@@ -150,6 +152,27 @@ python3 scripts/tc04_agentcfs.py                                    # 北京，V
 - **普通 NFS 型 CFS 可用于 AGS**：文档要求「Agent 文件系统」，但实测普通 NFS 也能正常挂载读写
 
 完整的 12 条文档与实现偏差见 [reports/SUMMARY.md](reports/SUMMARY.md)。
+
+---
+
+## 自定义镜像：DeepSeek Harness
+
+已把 DeepSeek Harness（DSH）打包成 AGS 可用的自定义沙箱镜像并推送到 TCR：
+
+| 项 | 值 |
+|---|---|
+| 镜像 | `euson-tcr.tencentcloudcr.com/cedricbwang/test:v1` |
+| digest | `sha256:e11a842a86142ee7003613c90c25e8b5d70a625a16b843ed43627371495a9d9e` |
+| 基础镜像 | AGS 公共 code 沙箱 `ccr.ccs.tencentyun.com/ags-image/sandbox-code:latest` |
+| DSH 版本 | `0.1.1-rc.2` |
+| Node | 24.8.0（基础镜像自带 Node 20 跑不了 DSH，已在镜像内升级） |
+| 端口 | `3080` Web UI / `49983` envd（AGS 探针） |
+| 自定义 base URL | 支持，通过 `DSH_LLM_BASE_URL` 等环境变量配置 |
+
+构建文件与完整说明见 **[`image/dsh/`](image/dsh/)**。
+
+**已验证链路**：AGS 拉取镜像 → 工具 ACTIVE → 实例 RUNNING → 容器内 Web UI 200 →
+**AGS 公网数据面 `https://3080-<instanceId>.ap-beijing.tencentags.com` 返回 200**。
 
 ---
 
