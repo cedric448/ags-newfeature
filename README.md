@@ -57,6 +57,7 @@
 │   └── cleanup.py             # 资源自动回收
 ├── reports/                   # 测试报告
 │   ├── SUMMARY.md             # ★ 总报告
+│   ├── UPLOAD-LIMIT.md        # 数据面文件上传上限踩坑记录
 │   ├── TC-01-VPC.md
 │   ├── TC-02.md
 │   ├── TC-03.md
@@ -150,6 +151,8 @@ python3 scripts/tc04_agentcfs.py                                    # 北京，V
 - **CFS `Path` 校验延迟**：`Path` 不存在时 `CreateSandboxTool` 仍返回 ACTIVE，直到 `StartSandboxInstance` 才报错
 - **envd `/health` 返回 204**（非 200），AGS 探针判定为成功
 - **普通 NFS 型 CFS 可用于 AGS**：文档要求「Agent 文件系统」，但实测普通 NFS 也能正常挂载读写
+
+完整的上传踩坑（413 上限、分片绕过、并发失败）见 **[reports/UPLOAD-LIMIT.md](reports/UPLOAD-LIMIT.md)**。
 
 完整的 12 条文档与实现偏差见 [reports/SUMMARY.md](reports/SUMMARY.md)。
 
