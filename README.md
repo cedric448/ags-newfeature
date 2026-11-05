@@ -161,10 +161,15 @@ python3 scripts/tc04_agentcfs.py                                    # 北京，V
 实测（`scripts/tc05_storage_template.py`，详见 **[reports/STORAGE-TEMPLATE-BENCH.md](reports/STORAGE-TEMPLATE-BENCH.md)**）：
 
 - **CFS / COS 存储模板可正常挂载**（SANDBOX 网络模式 + 4C8Gi 自定义镜像）
-- **AgentCBS 模板不可用**：启动实例报 `AgentCBS Volume requires an AgentCBS SystemDisk instance`，且当前 API 无系统盘类型字段 —— 官方文档亦注明「AgentCBS 即将支持」
-- 单机顺序吞吐：CFS 写 58 / 读 87 MB/s；COS 写 54 / 读 146 MB/s
-- **COS 小文件写入极差**：4K×2000 写耗时 513s（CFS 仅 22.5s，差 23 倍）—— 小文件必须用 CFS
-- 双实例共享同一 ReuseKey 可见性正常（ReadWriteMany），但单机性能离散度可达 11 倍
+- **AgentCBS 可用但路径不同**：不走 `VolumeTemplate`，而是 `CreateVolume` 建数据卷 + 实例级挂载
+  - 启动实例时**必须**同时传 `Metadata: x-ags-agent-cbs-system-disk="true"` 开启 AgentCBS 系统盘，否则报
+    `AgentCBS Volume requires an AgentCBS SystemDisk instance`
+  - E2B 侧用 `x-storage`（JSON 字符串，字段为小驼峰 `volumeId` / `mountPath`）
+  - **ReadWriteOnce 独占**：卷被占用时二次挂载报 `409 ResourceInUse`，换实例前须先停原实例并等卷释放
+- 单机顺序（256 MiB）：**CBS 写 128 / 冷读 79 MB/s**；CFS 写 58 / 读 87；COS 写 54 / 读 146
+- 单机小文件（4K×2000 写）：**CBS 4.8s（最快）**；CFS 22.5s；**COS 513s（差 107 倍，基本不可用）**
+- 跨实例持久化：CBS / CFS / COS 均验证通过（sha256 一致）
+- 性能离散度大（同配置实例间可达 11 倍），单次测量不宜作绝对基准
 
 完整的 12 条文档与实现偏差见 [reports/SUMMARY.md](reports/SUMMARY.md)。
 
