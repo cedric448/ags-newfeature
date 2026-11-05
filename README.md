@@ -58,6 +58,7 @@
 ├── reports/                   # 测试报告
 │   ├── SUMMARY.md             # ★ 总报告
 │   ├── UPLOAD-LIMIT.md        # 数据面文件上传上限踩坑记录
+│   ├── STORAGE-TEMPLATE-BENCH.md  # 存储模板挂载与读写性能
 │   ├── TC-01-VPC.md
 │   ├── TC-02.md
 │   ├── TC-03.md
@@ -153,6 +154,17 @@ python3 scripts/tc04_agentcfs.py                                    # 北京，V
 - **普通 NFS 型 CFS 可用于 AGS**：文档要求「Agent 文件系统」，但实测普通 NFS 也能正常挂载读写
 
 完整的上传踩坑（413 上限、分片绕过、并发失败）见 **[reports/UPLOAD-LIMIT.md](reports/UPLOAD-LIMIT.md)**。
+
+### 4. 存储模板（VolumeTemplate）挂载与性能
+
+`StorageMounts` 支持三种来源：旧版 `StorageSource`、数据卷 `Volume`、存储模板 `VolumeTemplate`。
+实测（`scripts/tc05_storage_template.py`，详见 **[reports/STORAGE-TEMPLATE-BENCH.md](reports/STORAGE-TEMPLATE-BENCH.md)**）：
+
+- **CFS / COS 存储模板可正常挂载**（SANDBOX 网络模式 + 4C8Gi 自定义镜像）
+- **AgentCBS 模板不可用**：启动实例报 `AgentCBS Volume requires an AgentCBS SystemDisk instance`，且当前 API 无系统盘类型字段 —— 官方文档亦注明「AgentCBS 即将支持」
+- 单机顺序吞吐：CFS 写 58 / 读 87 MB/s；COS 写 54 / 读 146 MB/s
+- **COS 小文件写入极差**：4K×2000 写耗时 513s（CFS 仅 22.5s，差 23 倍）—— 小文件必须用 CFS
+- 双实例共享同一 ReuseKey 可见性正常（ReadWriteMany），但单机性能离散度可达 11 倍
 
 完整的 12 条文档与实现偏差见 [reports/SUMMARY.md](reports/SUMMARY.md)。
 
