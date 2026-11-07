@@ -95,7 +95,7 @@ def main() -> int:
                     f"Path={cfs_back.get('Path')}", f"不一致: {cfs_back.get('Path')!r}")
     except Exception as exc:  # noqa: BLE001
         case1.fail("创建挂 CFS 的工具", str(exc)[:500])
-        rec.write(Path("reports/TC-04.md"))
+        rec.write(Path("reports/cases/TC-04-AGENTCFS.md"))
         return 1
 
     # ============ TC-04-2 负例：Path 不存在 ============
@@ -157,7 +157,7 @@ def main() -> int:
                  evidence={"Status": inst.get("Status"), "NetworkMode": inst.get("NetworkMode")})
     except Exception as exc:  # noqa: BLE001
         case3.fail("启动实例", str(exc)[:500])
-        rec.write(Path("reports/TC-04.md"))
+        rec.write(Path("reports/cases/TC-04-AGENTCFS.md"))
         return 1
 
     marker = f"cfs-payload-{ts}"
@@ -167,7 +167,7 @@ def main() -> int:
         case3.ok("E2B 连接实例", f"sandbox_id={sbx.sandbox_id}")
     except Exception as exc:  # noqa: BLE001
         case3.fail("E2B 连接实例", str(exc)[:400])
-        rec.write(Path("reports/TC-04.md"))
+        rec.write(Path("reports/cases/TC-04-AGENTCFS.md"))
         return 1
 
     code, out, err = E2B.run(
@@ -323,7 +323,7 @@ def main() -> int:
     except Exception as exc:  # noqa: BLE001
         case7.fail("MountPath 覆盖验证", str(exc)[:500])
 
-    rec.write(Path("reports/TC-04.md"))
+    rec.write(Path("reports/cases/TC-04-AGENTCFS.md"))
     rec.write_case_docs(Path("testcases"))
     return 0 if all(c.status == "PASS" for c in rec.cases) else 1
 

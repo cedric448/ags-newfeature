@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""TC-10 快照创建实例的真实加速验证。
+"""TC-07 快照创建实例的真实加速验证。
 
 完整链路：
   1. 创建 custom 工具（SANDBOX 模式）
@@ -17,9 +17,9 @@
   - 健康探测周期严重影响测量：ProbePeriodMs=2000 时冷启动 3.3s，500 时 1.9s
 
 用法：
-    python3 scripts/tc10_snapshot_start.py
-    python3 scripts/tc10_snapshot_start.py --probe-ms 500 --rounds 5 --concurrency 10
-    python3 scripts/tc10_snapshot_start.py --keep
+    python3 scripts/tc07_snapshot_start.py
+    python3 scripts/tc07_snapshot_start.py --probe-ms 500 --rounds 5 --concurrency 10
+    python3 scripts/tc07_snapshot_start.py --keep
 """
 from __future__ import annotations
 
@@ -43,7 +43,7 @@ def build_payload(name: str, probe_ms: int) -> dict:
     return {
         "ToolName": name,
         "ToolType": "custom",
-        "Description": "TC-10 snapshot start",
+        "Description": "TC-07 snapshot start",
         "NetworkConfiguration": {"NetworkMode": "SANDBOX"},
         "DefaultTimeout": "1h",
         "RoleArn": CFG.role_arn,
@@ -131,9 +131,9 @@ def main() -> int:
     ags = AgsApi()
     cleanup = CleanupRegistry(keep=args.keep or CFG.keep_resources)
     ts = int(time.time())
-    name = f"{CFG.run_prefix}-tc10-{ts}"
+    name = f"{CFG.run_prefix}-tc07-{ts}"
 
-    print("=== TC-10 快照启动加速验证 ===")
+    print("=== TC-07 快照启动加速验证 ===")
     print(f"region={ags.region} image={CFG.image} probe={args.probe_ms}ms")
 
     # 1) 工具
@@ -204,7 +204,7 @@ def main() -> int:
         "cold": cold, "snapshot_start": snap_res,
         "cold_concurrent": cold_conc, "snapshot_concurrent": snap_conc,
     }
-    path = Path("reports/artifacts/tc10-snapshot-start.json")
+    path = Path("reports/artifacts/tc07-snapshot-start.json")
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps(out, ensure_ascii=False, indent=2), encoding="utf-8")
     print(f"\n明细已写入 {path}")

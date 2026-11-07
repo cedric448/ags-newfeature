@@ -122,7 +122,7 @@ def main() -> int:
                     evidence={"Status": tool.get("Status"), "Persistent": tool.get("Persistent")})
     except Exception as exc:  # noqa: BLE001
         case2.fail("创建 custom Persistent 工具", str(exc)[:500])
-        rec.write(Path("reports/TC-03.md"))
+        rec.write(Path("reports/cases/TC-03-AGENT-ENGINE.md"))
         return 1
 
     # ============ TC-03-3 创建 Deployment ============
@@ -160,7 +160,7 @@ def main() -> int:
                     f"HeaderName={af.get('HeaderName')}", "缺少 HeaderName")
     except Exception as exc:  # noqa: BLE001
         case3.fail("CreateDeployment", str(exc)[:500])
-        rec.write(Path("reports/TC-03.md"))
+        rec.write(Path("reports/cases/TC-03-AGENT-ENGINE.md"))
         return 1
 
     # ============ TC-03-4 获取 Token 并访问数据面 ============
@@ -330,7 +330,7 @@ def main() -> int:
     except Exception as exc:  # noqa: BLE001
         case8.fail("DeleteDeployment", str(exc)[:400])
 
-    rec.write(Path("reports/TC-03.md"))
+    rec.write(Path("reports/cases/TC-03-AGENT-ENGINE.md"))
     rec.write_case_docs(Path("testcases"))
     return 0 if all(c.status == "PASS" for c in rec.cases) else 1
 

@@ -10,23 +10,25 @@
 
 ## 测试结果总览
 
-| 测试例 | 名称 | 结论 | 检查点 |
-|---|---|---|---|
-| [TC-01](testcases/) | 沙箱基线：TCR 镜像创建工具并启动实例 | ✅ PASS | 10/10 |
-| [TC-02](testcases/) | AgentBucket 持久化存储 | ✅ PASS | 17/17 |
-| [TC-03](testcases/) | Agent Engine（弹性部署 Deployment） | ✅ PASS | 17/17 |
-| [TC-04](testcases/) | AgentCFS 共享存储 | ⚠️ PASS | 13/14 |
-| TC-05 | 模板快照 Template Snapshot | ⏭ 暂缓 | — |
-| TC-06 | 沙箱快照 Sandbox Snapshot | ⏭ 暂缓 | — |
-| TC-07 | WAA 沙箱 | ⏭ 暂缓 | — |
-| TC-08 | OSWorld 沙箱 | ⏭ 暂缓 | — |
-| [TC-09](reports/TC-09-AUTO-SNAPSHOT.md) | auto-snapshot 启动速度对照 | ⚠️ 无差异 | 4/4 |
-| [TC-10](reports/TC-10-SNAPSHOT-START.md) | 快照创建实例的真实加速验证 | ⚠️ 无收益（持平） | 5/5 |
-| [TC-11](reports/TC-11-PAUSE-RESUME.md) | 带内存快照与 Pause/Resume 延迟 | ⚠️ 快照不支持内存态 | 6/6 |
+| 测试例 | 名称 | 结论 | 检查点 | 报告 |
+|---|---|---|---|---|
+| TC-01 | 沙箱基线：TCR 镜像创建工具并启动实例 | ✅ PASS | 10/10 | [报告](reports/cases/TC-01-BASELINE.md) |
+| TC-02 | AgentBucket 持久化存储 | ✅ PASS | 17/17 | [报告](reports/cases/TC-02-AGENTBUCKET.md) |
+| TC-03 | Agent Engine（弹性部署 Deployment） | ✅ PASS | 17/17 | [报告](reports/cases/TC-03-AGENT-ENGINE.md) |
+| TC-04 | AgentCFS 共享存储 | ⚠️ PASS | 13/14 | [报告](reports/cases/TC-04-AGENTCFS.md) |
+| TC-05 | 存储模板挂载与读写性能（CFS/COS/CBS） | ✅ 已打通 | 5/5 | [报告](reports/cases/TC-05-STORAGE.md) |
+| TC-06 | auto-snapshot 启动速度对照 | ⚠️ 无差异 | 4/4 | [报告](reports/cases/TC-06-AUTO-SNAPSHOT.md) |
+| TC-07 | 快照创建实例的真实加速验证 | ⚠️ 无收益 | 5/5 | [报告](reports/cases/TC-07-SNAPSHOT-START.md) |
+| TC-08 | 带内存快照与 Pause/Resume 延迟 | ⚠️ 能力受限 | 6/6 | [报告](reports/cases/TC-08-PAUSE-RESUME.md) |
+| TC-09 | 数据面文件上传上限（413 / 分片） | ✅ 已定位 | 5/5 | [报告](reports/cases/TC-09-UPLOAD-LIMIT.md) |
 
-**合计：7 个测试例，74 个检查点，58 通过 / 1 失败 / 15 结论为无差异、无收益或能力受限。**
+**合计：9 个测试例，82 个检查点，58 通过 / 1 失败 / 其余为无差异、无收益或能力受限。**
 
 完整结论、关键发现与文档偏差清单见 **[reports/SUMMARY.md](reports/SUMMARY.md)**。
+
+### 暂缓项
+
+WAA 沙箱、OSWorld 沙箱因依赖较重暂缓；快照相关能力已在 TC-06～TC-08 中实测完成。
 
 ---
 
@@ -35,44 +37,75 @@
 ```
 .
 ├── README.md
+├── .env.example                    # 环境变量模板
+├── .gitignore
+│
 ├── docs/
-│   ├── requirements/          # 原始需求文档
-│   │   ├── p.md               # 测试目标与测试例清单
-│   │   └── agentbucket.md     # AgentBucket 官方手册（存档）
+│   ├── requirements/               # 原始需求文档
+│   │   ├── p.md                    # 测试目标与用例清单
+│   │   └── agentbucket.md          # AgentBucket 官方手册（存档）
 │   ├── design/
-│   │   ├── docs/design/test-plan.md       # 测试方案（含环境摸底、踩坑记录、用例设计）
-│   │   └── decisions.md       # 与用户确认的决策记录
-│   └── guides/
-│       └── agentbucket-agentcfs-setup.md   # 存储资源创建指导
-├── scripts/
-│   ├── check_readiness.py     # 环境就绪检查（镜像 / CFS / 端到端冒烟）
-│   ├── tc01_baseline.py       # TC-01 沙箱基线
-│   ├── tc02_agentbucket.py    # TC-02 AgentBucket（8 用例）
-│   ├── tc03_agent_engine.py   # TC-03 Agent Engine（9 用例）
-│   └── tc04_agentcfs.py       # TC-04 AgentCFS（7 用例）
+│   │   ├── test-plan.md            # 测试方案（环境摸底、踩坑、用例设计）
+│   │   └── decisions.md            # 与用户确认的决策记录
+│   └── references/                 # 外部参考资料（产品文档存档）
+│       ├── agscbs-disk.md          # AgentCBS 数据盘接入
+│       ├── agscbs-sys.md           # AgentCBS 系统盘开关
+│       ├── auto-snapshot.md        # 暂停恢复 / Snapshot / Fork 性能报告
+│       ├── agentbucket-agentcfs-setup.md
+│       └── aio-sandbox-image-investigation.md
+│
+├── lib/                            # 公共库
+│   ├── config.py                   # 配置与环境变量
+│   ├── ags_api.py                  # AGS 控制面封装
+│   ├── e2b_api.py                  # E2B 数据面封装
+│   ├── recorder.py                 # 测试记录与文档生成
+│   └── cleanup.py                  # 资源自动回收
+│
+├── scripts/                        # 测试脚本，编号与测试例一一对应
+│   ├── tc01_baseline.py            # TC-01
+│   ├── tc02_agentbucket.py         # TC-02
+│   ├── tc03_agent_engine.py        # TC-03
+│   ├── tc04_agentcfs.py            # TC-04
+│   ├── tc05_storage_template.py    # TC-05 存储模板挂载与基准
+│   ├── tc05_cbs_volume.py          # TC-05 AgentCBS 卷管理
+│   ├── tc06_auto_snapshot.py       # TC-06
+│   ├── tc07_snapshot_start.py      # TC-07
+│   ├── tc08_pause_resume.py        # TC-08
+│   ├── tc09_probe_upload_limit.py  # TC-09 上传上限探测
+│   ├── tc09_probe_upload_edge.py   # TC-09 阈值精确定位
+│   └── tools/                      # 通用工具脚本
+│       ├── check_readiness.py      # 环境就绪检查
+│       └── chunked_upload.py       # 客户端分片上传实现
+│
+├── reports/
+│   ├── SUMMARY.md                  # 总报告（结论 / 缺陷 / 偏差汇总）
+│   ├── cases/                      # 每个测试例一份报告
+│   │   ├── TC-01-BASELINE.md
+│   │   ├── TC-02-AGENTBUCKET.md
+│   │   ├── TC-03-AGENT-ENGINE.md
+│   │   ├── TC-04-AGENTCFS.md
+│   │   ├── TC-05-STORAGE.md
+│   │   ├── TC-06-AUTO-SNAPSHOT.md
+│   │   ├── TC-07-SNAPSHOT-START.md
+│   │   ├── TC-08-PAUSE-RESUME.md
+│   │   └── TC-09-UPLOAD-LIMIT.md
+│   └── artifacts/                  # 原始测量数据（不入库）
+│
+├── testcase-details/               # 逐用例明细（自动生成，25 份）
+│
 ├── image/
-│   └── dsh/                   # DeepSeek Harness 自定义镜像（Dockerfile + entrypoint + 说明）
-├── lib/                       # 公共库
-│   ├── config.py              # 配置与环境变量
-│   ├── ags_api.py             # 腾讯云 AGS 控制面封装
-│   ├── e2b_api.py             # E2B 数据面封装
-│   ├── recorder.py            # 测试记录与文档生成
-│   └── cleanup.py             # 资源自动回收
-├── reports/                   # 测试报告
-│   ├── SUMMARY.md             # ★ 总报告
-│   ├── UPLOAD-LIMIT.md        # 数据面文件上传上限踩坑记录
-│   ├── STORAGE-TEMPLATE-BENCH.md  # 存储模板挂载与读写性能
-│   ├── TC-09-AUTO-SNAPSHOT.md     # auto-snapshot 启动速度对照
-│   ├── TC-10-SNAPSHOT-START.md    # 快照创建实例加速验证
-│   ├── TC-11-PAUSE-RESUME.md      # 带内存快照与 Pause/Resume 延迟
-│   ├── TC-01-VPC.md
-│   ├── TC-02.md
-│   ├── TC-03.md
-│   └── TC-04.md
-├── testcases/                 # 按测试例生成的标准文档（24 份）
-├── .env.example               # 环境变量模板
-└── .gitignore
+│   └── dsh/                        # DeepSeek Harness 自定义镜像
+│
+└── data/references/                # 大体积参考数据（预留）
 ```
+
+### 三层文档关系
+
+| 层级 | 位置 | 粒度 | 用途 |
+|---|---|---|---|
+| 总报告 | reports/SUMMARY.md | 全部测试例 | 一页看全貌：结论、缺陷、文档偏差 |
+| 用例报告 | reports/cases/TC-XX-*.md | 一个测试例 | 测试设计、完整数据、结论 |
+| 用例明细 | testcase-details/TC-XX-N-*.md | 一个检查点 | 单用例的环境、步骤、实际输出 |
 
 ---
 
@@ -108,18 +141,27 @@ cp .env.example .env
 ### 3. 就绪检查
 
 ```bash
-python3 scripts/check_readiness.py        # 检查镜像 tag、envd、CFS 挂载点
-python3 scripts/check_readiness.py --e2e  # 额外做端到端冒烟
+python3 scripts/tools/check_readiness.py        # 检查镜像 tag、envd、CFS 挂载点
+python3 scripts/tools/check_readiness.py --e2e  # 额外做端到端冒烟
 ```
 
 ### 4. 执行测试
 
 ```bash
-python3 scripts/tc01_baseline.py                                    # 北京，VPC
-python3 scripts/tc02_agentbucket.py                                 # 北京，VPC
-python3 scripts/tc03_agent_engine.py                                # 上海，PUBLIC
-python3 scripts/tc04_agentcfs.py                                    # 北京，VPC
+python3 scripts/tc01_baseline.py                                    # TC-01 北京，VPC
+python3 scripts/tc02_agentbucket.py                                 # TC-02 北京，VPC
+python3 scripts/tc03_agent_engine.py                                # TC-03 上海，PUBLIC
+python3 scripts/tc04_agentcfs.py                                    # TC-04 北京，VPC
+python3 scripts/tc05_storage_template.py --small                    # TC-05 存储模板基准
+python3 scripts/tc05_cbs_volume.py --status                         # TC-05 CBS 卷管理
+python3 scripts/tc06_auto_snapshot.py                               # TC-06 auto-snapshot 对照
+python3 scripts/tc07_snapshot_start.py --probe-ms 500               # TC-07 快照启动
+python3 scripts/tc08_pause_resume.py --verify-memory                # TC-08 Pause/Resume
+python3 scripts/tc09_probe_upload_limit.py --hi 256                 # TC-09 上传上限探测
 ```
+
+> **重要**：测量启动/恢复延迟时务必把 `ProbePeriodMs` 压到 500ms，
+> 默认 2000ms 会让冷启动虚高约 1.5 倍，掩盖真实差异（详见 TC-07）。
 
 > 所有脚本内置 `CleanupRegistry`，测试结束自动回收实例与工具。
 > 排障时设 `AGS_KEEP_RESOURCES=1` 保留资源；`AGS_TEST_PREFIX` 可改资源名前缀。
@@ -148,7 +190,7 @@ python3 scripts/tc04_agentcfs.py                                    # 北京，V
 - **对照**：AgentBucket 的同类能力**正常**，问题限定在 CFS 路径
 - **影响**：依赖只读保护隔离多租户数据的场景存在数据误写风险
 
-详见 [reports/TC-04.md](reports/TC-04.md) 与 `testcases/TC-04-6-*.md`。
+详见 [reports/cases/TC-04-AGENTCFS.md](reports/cases/TC-04-AGENTCFS.md) 与 `testcase-details/TC-04-6-*.md`。
 
 ### 3. 其他值得注意的行为
 
@@ -159,12 +201,12 @@ python3 scripts/tc04_agentcfs.py                                    # 北京，V
 - **envd `/health` 返回 204**（非 200），AGS 探针判定为成功
 - **普通 NFS 型 CFS 可用于 AGS**：文档要求「Agent 文件系统」，但实测普通 NFS 也能正常挂载读写
 
-完整的上传踩坑（413 上限、分片绕过、并发失败）见 **[reports/UPLOAD-LIMIT.md](reports/UPLOAD-LIMIT.md)**。
+完整的上传踩坑（413 上限、分片绕过、并发失败）见 **[reports/cases/TC-09-UPLOAD-LIMIT.md](reports/cases/TC-09-UPLOAD-LIMIT.md)**。
 
 ### 4. 存储模板（VolumeTemplate）挂载与性能
 
 `StorageMounts` 支持三种来源：旧版 `StorageSource`、数据卷 `Volume`、存储模板 `VolumeTemplate`。
-实测（`scripts/tc05_storage_template.py`，详见 **[reports/STORAGE-TEMPLATE-BENCH.md](reports/STORAGE-TEMPLATE-BENCH.md)**）：
+实测（`scripts/tc05_storage_template.py`，详见 **[reports/cases/TC-05-STORAGE.md](reports/cases/TC-05-STORAGE.md)**）：
 
 - **CFS / COS 存储模板可正常挂载**（SANDBOX 网络模式 + 4C8Gi 自定义镜像）
 - **AgentCBS 可用但路径不同**：不走 `VolumeTemplate`，而是 `CreateVolume` 建数据卷 + 实例级挂载
@@ -219,11 +261,11 @@ python3 scripts/tc04_agentcfs.py                                    # 北京，V
 |---|---|
 | 推送被测镜像 | `cedricbwang/test:v1` 仓库当前 **0 个 tag**；该 namespace 为私有，还需确认 `ags-tcr-full` 角色有拉取权限。TC-01/TC-04 暂用已验证镜像 `sandbox/sandbox:v1`，镜像就绪后需复测 |
 
-用 `scripts/check_readiness.py` 可随时确认：
+用 `scripts/tools/check_readiness.py` 可随时确认：
 
 ```bash
-python3 scripts/check_readiness.py        # 只检查
-python3 scripts/check_readiness.py --e2e  # 检查 + 端到端冒烟
+python3 scripts/tools/check_readiness.py        # 只检查
+python3 scripts/tools/check_readiness.py --e2e  # 检查 + 端到端冒烟
 ```
 
 ---

@@ -8,7 +8,7 @@
 
 ## 0. 环境摸底结果（已验证）
 
-> **2026-09-19 更新：TC-01 基线已打通并 PASS。** 详见 `testcases/TC-01-*.md`。
+> **2026-09-19 更新：TC-01 基线已打通并 PASS。** 详见 `testcase-details/TC-01-*.md`。
 
 ### 0.1 基线打通过程（关键结论）
 
@@ -95,10 +95,10 @@
 
 | 测试例 | 状态 | 报告 |
 |---|---|---|
-| TC-01 沙箱基线（TCR 镜像 + 启动打通） | ✅ PASS 10/10 | `reports/TC-01-VPC.md` |
-| TC-02 AgentBucket 持久化存储 | ✅ PASS 17/17 | `reports/TC-02.md` |
-| TC-03 Agent Engine 弹性部署 | ✅ PASS 17/17 | `reports/TC-03.md` |
-| TC-04 AgentCFS 共享存储 | ⚠️ PASS 13/14（1 缺陷） | `reports/TC-04.md` |
+| TC-01 沙箱基线（TCR 镜像 + 启动打通） | ✅ PASS 10/10 | `reports/cases/TC-01-BASELINE.md` |
+| TC-02 AgentBucket 持久化存储 | ✅ PASS 17/17 | `reports/cases/TC-02-AGENTBUCKET.md` |
+| TC-03 Agent Engine 弹性部署 | ✅ PASS 17/17 | `reports/cases/TC-03-AGENT-ENGINE.md` |
+| TC-04 AgentCFS 共享存储 | ⚠️ PASS 13/14（1 缺陷） | `reports/cases/TC-04-AGENTCFS.md` |
 | TC-05/06 模板快照 / 沙箱快照 | ⏭ SKIP（按决策暂缓） | — |
 | TC-07/08 WAA / OSWorld | ⏭ SKIP（按决策暂缓） | — |
 
@@ -113,19 +113,19 @@
 
 ### TC-02 AgentBucket 使用 —— 档位 B ✅ 已完成
 - **依据**：`docs/requirements/agentbucket.md` + 官方文档 137731
-- **已完成 8 个用例**：见 `reports/TC-02.md`
+- **已完成 8 个用例**：见 `reports/cases/TC-02-AGENTBUCKET.md`
 - **使用资源**：LibraryId `smh3qv6cmcoscm4i`（`cedricbwang-agentbucket`）、spaceID `space3ly9r9ni7fhju`
   （通过 SMH 业务面 `GET /api/v1/space/{libraryId}/list` 自动发现）
 
 ### TC-03 Agent Engine（弹性部署 Deployment）—— 档位 B ✅ 已完成
-- **已完成 9 个用例**：见 `reports/TC-03.md`
+- **已完成 9 个用例**：见 `reports/cases/TC-03-AGENT-ENGINE.md`
 - **地域约束（实测）**：仅 `ap-shanghai` / `ap-hongkong` 支持；
   `ap-beijing` / `ap-guangzhou` / `ap-singapore` 返回 `UnsupportedRegion`
 - **工具约束**：必须 `Persistent=true`，且仅 custom/mobile/android-world/osworld/waa 支持
 
 ### TC-04 AgentCFS 使用 —— 档位 B ✅ 已完成
 - **依据**：`https://cloud.tencent.com/document/product/582/137338` + AGS 存储挂载文档 132215
-- **已完成 7 个用例**：见 `reports/TC-04.md`
+- **已完成 7 个用例**：见 `reports/cases/TC-04-AGENTCFS.md`
 - **使用资源**：`cfs-45a313f3e`（`cedricbwang`，TURBO 型 AgentCFS，挂载点已建）
 - **兼容性**：另实测普通 NFS 型 CFS（`cfs-cunkkj23`）也能被 AGS 接受并挂载读写
 - **发现缺陷 BUG-01**：CFS 的实例级 `MountOptions.ReadOnly=true` 被接受但**未生效**
@@ -155,7 +155,7 @@
 | 幂等 | `ClientToken` 重复提交 |
 | 认证 | `AuthMode`（DEFAULT/TOKEN/NONE/PUBLIC）矩阵 |
 | 清理 | 每个用例结束必须回收实例与临时工具（`--ignore-not-found`） |
-| 文档产出 | 每个测试例一份 `testcases/TC-XX-<name>.md`（环境、步骤、命令、实际输出、结论、问题） |
+| 文档产出 | 每个测试例一份 `testcase-details/TC-XX-<name>.md`（环境、步骤、命令、实际输出、结论、问题） |
 
 ---
 

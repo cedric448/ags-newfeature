@@ -16,7 +16,7 @@
 4. 合并后校验总大小，可选校验 md5。
 
 用法（作为库）：
-    from scripts.chunked_upload import chunked_write_file, chunked_write_file_concurrent
+    from scripts.tools.chunked_upload import chunked_write_file, chunked_write_file_concurrent
 
     # 串行
     chunked_write_file(sbx, "/data/big.iso", "/tmp/big.iso",
@@ -27,8 +27,8 @@
                                   chunk_size=128 * 1024 * 1024, concurrency=4, user="root")
 
 用法（独立冒烟，需要 AGS 环境，会自动创建/回收沙箱）：
-    python3 scripts/chunked_upload.py --smoke --size-mib 300                 # 串行
-    python3 scripts/chunked_upload.py --smoke --size-mib 300 --concurrency 4 # 并发
+    python3 scripts/tools/chunked_upload.py --smoke --size-mib 300                 # 串行
+    python3 scripts/tools/chunked_upload.py --smoke --size-mib 300 --concurrency 4 # 并发
 """
 from __future__ import annotations
 
@@ -41,7 +41,7 @@ import threading
 import time
 from pathlib import Path
 
-sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent.parent))
 
 from lib import CFG, AgsApi, CleanupRegistry, E2B  # noqa: E402
 

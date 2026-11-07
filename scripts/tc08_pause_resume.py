@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""TC-11 带内存快照与 Pause/Resume 延迟测试。
+"""TC-08 带内存快照与 Pause/Resume 延迟测试。
 
 核心结论（2026-11-06，ap-beijing，2C4Gi，ProbePeriodMs=500）：
   - CreateSandboxSnapshot 不支持 Memory=true（报 "Memory=true is not supported for Runtime Snapshots"）
@@ -11,9 +11,9 @@
 前提：暂停/恢复需要在 AgentCBS 系统盘实例上（Metadata x-ags-agent-cbs-system-disk=true）。
 
 用法：
-    python3 scripts/tc11_pause_resume.py
-    python3 scripts/tc11_pause_resume.py --rounds 5 --verify-memory
-    python3 scripts/tc11_pause_resume.py --keep
+    python3 scripts/tc08_pause_resume.py
+    python3 scripts/tc08_pause_resume.py --rounds 5 --verify-memory
+    python3 scripts/tc08_pause_resume.py --keep
 """
 from __future__ import annotations
 
@@ -36,7 +36,7 @@ def build_payload(name: str, probe_ms: int = 500) -> dict:
     return {
         "ToolName": name,
         "ToolType": "custom",
-        "Description": "TC-11 pause/resume",
+        "Description": "TC-08 pause/resume",
         "NetworkConfiguration": {"NetworkMode": "SANDBOX"},
         "DefaultTimeout": "2h",
         "RoleArn": CFG.role_arn,
@@ -186,9 +186,9 @@ def main() -> int:
     ags = AgsApi()
     cleanup = CleanupRegistry(keep=args.keep or CFG.keep_resources)
     ts = int(time.time())
-    name = f"{CFG.run_prefix}-tc11-{ts}"
+    name = f"{CFG.run_prefix}-tc08-{ts}"
 
-    print("=== TC-11 带内存快照与 Pause/Resume ===")
+    print("=== TC-08 带内存快照与 Pause/Resume ===")
     tool_id = ags.create_tool(build_payload(name, args.probe_ms))["ToolId"]
     cleanup.tool(ags, tool_id)
     ags.wait_tool(tool_id, want="ACTIVE", timeout=900)
@@ -232,7 +232,7 @@ def main() -> int:
 
     out = {"params": vars(args), "memory_snapshot": mem_snap,
            "with_memory": with_mem, "without_memory": no_mem, "verify": verify}
-    path = Path("reports/artifacts/tc11-pause-resume.json")
+    path = Path("reports/artifacts/tc08-pause-resume.json")
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps(out, ensure_ascii=False, indent=2), encoding="utf-8")
     print(f"\n明细已写入 {path}")

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""TC-09 auto-snapshot 启动速度对照测试。
+"""TC-06 auto-snapshot 启动速度对照测试。
 
 目的：验证「工具名以 auto-snapshot 结尾」是否会触发自动快照、从而加速实例拉起。
 
@@ -44,7 +44,7 @@ def build_payload(name: str, network: dict | None = None) -> dict:
     return {
         "ToolName": name,
         "ToolType": "custom",
-        "Description": f"TC-09 auto-snapshot 启动速度对照（{name}）",
+        "Description": f"TC-06 auto-snapshot 启动速度对照（{name}）",
         "NetworkConfiguration": network or {"NetworkMode": "SANDBOX"},
         "DefaultTimeout": "1h",
         "RoleArn": CFG.role_arn,
@@ -204,7 +204,7 @@ def main() -> int:
     cleanup = CleanupRegistry(keep=args.keep or CFG.keep_resources)
     ts = int(time.time())
 
-    print("=== TC-09 auto-snapshot 启动速度对照 ===")
+    print("=== TC-06 auto-snapshot 启动速度对照 ===")
     print(f"region={ags.region} image={CFG.image} network=SANDBOX")
 
     tools = create_pair(ags, cleanup, ts)
@@ -244,7 +244,7 @@ def main() -> int:
 
     result = {"tools": tools, "api": api, "e2b": e2b, "concurrent": conc,
               "summary": summary, "verdict": verdict}
-    out_path = Path("reports/artifacts/tc09-auto-snapshot.json")
+    out_path = Path("reports/artifacts/tc06-auto-snapshot.json")
     out_path.parent.mkdir(parents=True, exist_ok=True)
     out_path.write_text(json.dumps(result, ensure_ascii=False, indent=2), encoding="utf-8")
     print()

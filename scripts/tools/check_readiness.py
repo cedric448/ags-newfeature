@@ -8,8 +8,8 @@
   4. 端到端：能否用该镜像 + 该 CFS 创建工具 / 启动实例 / 挂载读写
 
 用法：
-    python3 scripts/check_readiness.py            # 只做检查
-    python3 scripts/check_readiness.py --e2e      # 额外做一次端到端冒烟
+    python3 scripts/tools/check_readiness.py            # 只做检查
+    python3 scripts/tools/check_readiness.py --e2e      # 额外做一次端到端冒烟
 """
 from __future__ import annotations
 
@@ -21,7 +21,7 @@ import sys
 import time
 from pathlib import Path
 
-sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent.parent))
 
 from lib import CFG, AgsApi, E2B  # noqa: E402
 

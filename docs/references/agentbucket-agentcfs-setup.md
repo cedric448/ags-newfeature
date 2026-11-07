@@ -116,7 +116,7 @@ AGENTBUCKET_LIBRARY_SECRET=<见本地 .env，勿提交>
 1. 打开 [文件存储控制台](https://console.cloud.tencent.com/cfs)
 2. 找到目标文件系统 → 进入「挂载点」页签 → 「添加挂载点」
 3. 选择 VPC、子网与权限组（权限组需放通沙箱网段）
-4. 创建后用 `python3 scripts/check_readiness.py` 确认
+4. 创建后用 `python3 scripts/tools/check_readiness.py` 确认
 
 > ⚠️ CFS 的 PaaS API **不提供创建挂载点的接口**（全套 54 个 action 中无 `CreateMountTarget`），
 > 只能在控制台操作。
@@ -188,7 +188,7 @@ AGENTCFS_PATH=/
 AGT_IMAGE=euson-tcr.tencentcloudcr.com/cedricbwang/test:v1
 ```
 
-就绪后用 `python3 scripts/check_readiness.py --e2e` 验证。
+就绪后用 `python3 scripts/tools/check_readiness.py --e2e` 验证。
 
 ---
 

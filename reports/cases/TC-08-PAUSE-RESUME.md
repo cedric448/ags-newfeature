@@ -1,8 +1,8 @@
-# TC-11 带内存快照与 Pause/Resume 延迟测试
+# TC-08 带内存快照与 Pause/Resume 延迟测试
 
 | 项 | 值 |
 |---|---|
-| 测试例编号 | TC-11 |
+| 测试例编号 | TC-08 |
 | 测试目标 | 测「带内存状态保存/恢复」的最快唤醒路径：Pause/Resume vs 带内存快照 |
 | 地域 | `ap-beijing` |
 | 网络模式 | `SANDBOX` |
@@ -10,7 +10,7 @@
 | 镜像 | `euson-tcr.tencentcloudcr.com/cedricbwang/test:v1` |
 | ProbePeriodMs | 500 |
 | 测试日期 | 2026-11-06 |
-| 参考 | [auto-snapshot.md](../docs/guides/auto-snapshot.md)（上海 2026-08-12 报告） |
+| 参考 | [auto-snapshot.md](../../docs/references/auto-snapshot.md)（上海 2026-08-12 报告） |
 | 结论 | ✅ **Pause/Resume 带内存恢复仅 1.7–2.1s**；❌ **快照不支持 Memory=true** |
 
 ---
@@ -108,7 +108,7 @@ mem-1794043493
 | 磁盘文件是否保留 | ✅ `/tmp/disk-marker.txt` 内容完整 |
 | 后台进程是否保留 | ❌ 不保留（PID 变了，进程需重新拉起） |
 
-与 TC-10 结论一致：磁盘快照恢复（1.97s）与冷启动（1.87–1.95s）基本持平。
+与 TC-07 结论一致：磁盘快照恢复（1.97s）与冷启动（1.87–1.95s）基本持平。
 
 ---
 
@@ -173,9 +173,9 @@ mem-1794043493
 ## 8. 复现方式
 
 ```bash
-python3 scripts/tc11_pause_resume.py                    # 完整对照
-python3 scripts/tc11_pause_resume.py --rounds 5         # 增加轮次
-python3 scripts/tc11_pause_resume.py --verify-memory    # 附带内存态保留验证
+python3 scripts/tc08_pause_resume.py                    # 完整对照
+python3 scripts/tc08_pause_resume.py --rounds 5         # 增加轮次
+python3 scripts/tc08_pause_resume.py --verify-memory    # 附带内存态保留验证
 ```
 
 ---

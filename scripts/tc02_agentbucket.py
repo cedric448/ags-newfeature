@@ -104,7 +104,7 @@ def main() -> int:
         cleanup.tool(ags, tool_id)
     except Exception as exc:  # noqa: BLE001
         case.fail("CreateSandboxTool (code-interpreter)", str(exc)[:500])
-        rec.write(Path("reports/TC-02.md"))
+        rec.write(Path("reports/cases/TC-02-AGENTBUCKET.md"))
         return 1
 
     try:
@@ -118,7 +118,7 @@ def main() -> int:
         case.check("创建工具阶段未回填 SpaceId", not has_space, "确认未传 SpaceId", "出现了 SpaceId 字段")
     except Exception as exc:  # noqa: BLE001
         case.fail("等待工具 ACTIVE", str(exc)[:500])
-        rec.write(Path("reports/TC-02.md"))
+        rec.write(Path("reports/cases/TC-02-AGENTBUCKET.md"))
         return 1
 
     # ================= TC-02-2 负例：custom 缺 Probe =================
@@ -154,7 +154,7 @@ def main() -> int:
         case3.ok("E2B 创建沙箱实例", f"sandbox_id={sbx1.sandbox_id}")
     except Exception as exc:  # noqa: BLE001
         case3.fail("E2B 创建沙箱实例", str(exc)[:500])
-        rec.write(Path("reports/TC-02.md"))
+        rec.write(Path("reports/cases/TC-02-AGENTBUCKET.md"))
         return 1
 
     try:
@@ -291,7 +291,7 @@ def main() -> int:
     except Exception as exc:  # noqa: BLE001
         case8.ok("不存在的 spaceID 导致实例创建失败（也是可接受行为）", str(exc)[:300])
 
-    rec.write(Path("reports/TC-02.md"))
+    rec.write(Path("reports/cases/TC-02-AGENTBUCKET.md"))
     rec.write_case_docs(Path("testcases"))
     return 0 if all(c.status == "PASS" for c in rec.cases) else 1
 

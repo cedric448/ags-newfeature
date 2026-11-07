@@ -11,10 +11,10 @@
 3. 记录成功/失败边界、HTTP 状态码、异常类型与报文。
 
 用法：
-    python3 scripts/probe_upload_limit.py                 # 自动新建工具并探针
-    python3 scripts/probe_upload_limit.py --tool <ToolName>   # 复用已有工具
-    python3 scripts/probe_upload_limit.py --mode vpc      # 网络模式：vpc(默认)/public
-    python3 scripts/probe_upload_limit.py --lo 1 --hi 512 # 自定义搜索区间（MiB）
+    python3 scripts/tc09_probe_upload_limit.py                 # 自动新建工具并探针
+    python3 scripts/tc09_probe_upload_limit.py --tool <ToolName>   # 复用已有工具
+    python3 scripts/tc09_probe_upload_limit.py --mode vpc      # 网络模式：vpc(默认)/public
+    python3 scripts/tc09_probe_upload_limit.py --lo 1 --hi 512 # 自定义搜索区间（MiB）
 """
 from __future__ import annotations
 

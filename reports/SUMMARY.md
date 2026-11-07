@@ -33,8 +33,8 @@
 
 | ID | 严重度 | 标题 | 证据 |
 |---|---|---|---|
-| **BUG-01** | 中高 | CFS 挂载的实例级只读收紧不生效 | `testcases/TC-04-6-*.md`：`MountOptions.ReadOnly=true` 被控制面接受并原样回读，但沙箱内挂载仍为 `rw`（virtiofs），写入成功。对照 AgentBucket 同类能力（TC-02-7）工作正常 |
-| **ISSUE-01** | 低（体验） | CFS `Path` 校验延迟到启动实例阶段 | `testcases/TC-04-2-*.md`：`Path` 不存在时 `CreateSandboxTool` 仍返回 ACTIVE，直到 `StartSandboxInstance` 才报 `FailedOperation.StorageMount` |
+| **BUG-01** | 中高 | CFS 挂载的实例级只读收紧不生效 | `testcase-details/TC-04-6-*.md`：`MountOptions.ReadOnly=true` 被控制面接受并原样回读，但沙箱内挂载仍为 `rw`（virtiofs），写入成功。对照 AgentBucket 同类能力（TC-02-7）工作正常 |
+| **ISSUE-01** | 低（体验） | CFS `Path` 校验延迟到启动实例阶段 | `testcase-details/TC-04-2-*.md`：`Path` 不存在时 `CreateSandboxTool` 仍返回 ACTIVE，直到 `StartSandboxInstance` 才报 `FailedOperation.StorageMount` |
 
 ---
 
@@ -149,7 +149,7 @@ AGS received the provider result`。经逐项定位，真实根因是**五个独
 | 9 | VPC 出网行为记录 | ✅（实测可出网） |
 | 10 | 停止实例并确认回收 | ✅ |
 
-产物：`scripts/tc01_baseline.py`、`reports/TC-01-VPC.md`、`testcases/TC-01-*.md`
+产物：`scripts/tc01_baseline.py`、`reports/cases/TC-01-BASELINE.md`、`testcase-details/TC-01-*.md`
 
 ### TC-02 AgentBucket（PASS）
 
@@ -176,7 +176,7 @@ AGS received the provider result`。经逐项定位，真实根因是**五个独
 **结论**：8 个用例 17 个检查点全部通过，AgentBucket 功能在用户自建媒体库上表现正常，
 包括跨实例持久化（TC-02-5）与实例级只读收紧（TC-02-7）。
 
-产物：`scripts/tc02_agentbucket.py`、`reports/TC-02.md`、8 个用例文档
+产物：`scripts/tc02_agentbucket.py`、`reports/cases/TC-02-AGENTBUCKET.md`、8 个用例文档
 
 ### TC-03 Agent Engine 弹性部署（PASS）
 
@@ -194,7 +194,7 @@ AGS received the provider result`。经逐项定位，真实根因是**五个独
 | TC-03-7 | 负例：绑定非 Persistent 工具 | ✅ | 被拒 |
 | TC-03-8 | 异步删除 | ✅ | 删除最终生效 |
 
-产物：`scripts/tc03_agent_engine.py`、`reports/TC-03.md`、9 个用例文档
+产物：`scripts/tc03_agent_engine.py`、`reports/cases/TC-03-AGENT-ENGINE.md`、9 个用例文档
 
 ### TC-04 AgentCFS 共享存储（PASS，含 1 缺陷）
 
@@ -224,7 +224,7 @@ AGS received the provider result`。经逐项定位，真实根因是**五个独
 **结论**：7 个用例 13/14 检查点通过。**BUG-01 在用户的 AgentCFS 上同样复现**，
 进一步确认该缺陷与具体 CFS 实例无关，属功能实现问题。
 
-产物：`scripts/tc04_agentcfs.py`、`reports/TC-04.md`、7 个用例文档
+产物：`scripts/tc04_agentcfs.py`、`reports/cases/TC-04-AGENTCFS.md`、7 个用例文档
 
 ---
 
@@ -256,11 +256,18 @@ ags-newfeature/
 │   └── cleanup.py                    # 资源自动回收
 ├── reports/                          # 测试报告
 │   ├── SUMMARY.md                    # ★ 总报告
-│   ├── TC-01-VPC.md
-│   ├── TC-02.md
-│   ├── TC-03.md
-│   └── TC-04.md
-└── testcases/                        # 按测试例生成的标准文档（24 份）
+│   ├── cases/                        # 每个测试例一份
+│   │   ├── TC-01-BASELINE.md
+│   │   ├── TC-02-AGENTBUCKET.md
+│   │   ├── TC-03-AGENT-ENGINE.md
+│   │   ├── TC-04-AGENTCFS.md
+│   │   ├── TC-05-STORAGE.md
+│   │   ├── TC-06-AUTO-SNAPSHOT.md
+│   │   ├── TC-07-SNAPSHOT-START.md
+│   │   ├── TC-08-PAUSE-RESUME.md
+│   │   └── TC-09-UPLOAD-LIMIT.md
+│   └── artifacts/                    # 原始测量数据（不入库）
+└── testcase-details/                 # 逐用例明细（自动生成，25 份）
 ```
 
 ### 复现方式
@@ -282,7 +289,7 @@ python3 scripts/tc04_agentcfs.py                                   # 北京，VP
 
 | 项 | 需要谁 | 说明 |
 |---|---|---|
-| **BUG-01 修复** | AGS 产品团队 | CFS `MountOptions.ReadOnly=true` 未在沙箱内生效（证据见 `reports/TC-04.md`） |
+| **BUG-01 修复** | AGS 产品团队 | CFS `MountOptions.ReadOnly=true` 未在沙箱内生效（证据见 `reports/cases/TC-04-AGENTCFS.md`） |
 | **ISSUE-01 改进** | AGS 产品团队 | CFS `Path` 校验建议提前到 `CreateSandboxTool` 阶段 |
 | 快照功能范围澄清 | 产品/用户 | 公开 API/SDK/文档均无 Snapshot，需明确是什么功能 |
 | WAA / OSWorld | 用户 | 需 WAA 兼容模板 / OSWorld 兼容模板 + 模型 Key |

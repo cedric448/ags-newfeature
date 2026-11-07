@@ -8,7 +8,7 @@
 | envd | 镜像内 `/usr/bin/envd`（基础镜像 `sandbox-code` 系） |
 | 镜像 | `euson-tcr.tencentcloudcr.com/cedricbwang/test:v1` |
 | 测试日期 | 2026-10-10 |
-| 探针脚本 | `scripts/probe_upload_limit.py`、`scripts/probe_upload_edge.py`、`scripts/chunked_upload.py` |
+| 探针脚本 | `scripts/tc09_probe_upload_limit.py`、`scripts/tc09_probe_upload_edge.py`、`scripts/tools/chunked_upload.py` |
 
 > 背景：用户反馈用 e2b SDK 往 AGS 沙箱上传文件时遇到 `413 file too large`，
 > 需要确认 AGS 数据面（envd `/files` 接口）实际允许的单文件 / 单请求大小上限，
@@ -32,7 +32,7 @@
 ## 2. 单请求大小上限定位（413 阈值）
 
 ### 方法
-用 `scripts/probe_upload_limit.py`：几何增长（1 MiB 起 ×2）定位失败点，再二分收敛。
+用 `scripts/tc09_probe_upload_limit.py`：几何增长（1 MiB 起 ×2）定位失败点，再二分收敛。
 `files.write` 成功后再用 `stat -c %s` 校验落盘大小。
 
 ### 实测数据
@@ -85,7 +85,7 @@ e2b.exceptions.SandboxException: 413: <html>
 4. 校验：每片落盘大小 + 合并后总大小，可选 md5。
 
 ### 实现
-`scripts/chunked_upload.py`：
+`scripts/tools/chunked_upload.py`：
 
 ```python
 from scripts.chunked_upload import chunked_write_file
@@ -109,7 +109,7 @@ chunked_write_file(
 ### 实测结果（PASS）
 
 ```
-python3 scripts/chunked_upload.py --smoke --size-mib 300 --chunk-mib 128
+python3 scripts/tools/chunked_upload.py --smoke --size-mib 300 --chunk-mib 128
 ```
 
 ```
@@ -158,7 +158,7 @@ python3 scripts/chunked_upload.py --smoke --size-mib 300 --chunk-mib 128
 ### 影响与建议
 
 - **不要对大文件上传做多线程并发分片**——会 100% 失败。
-- 分片上传请保持**串行**（`scripts/chunked_upload.py` 默认 `concurrency=1`）。
+- 分片上传请保持**串行**（`scripts/tools/chunked_upload.py` 默认 `concurrency=1`）。
 - 需要提速时的可行方向（未逐一实测，供后续验证）：
   - HTTP/1.1 + 多连接（规避 http2 多路复用）是否可用；
   - 改用非数据面通道（对象存储 / COS 中转，沙箱内 `curl` 内网拉取）；
@@ -180,16 +180,16 @@ python3 scripts/chunked_upload.py --smoke --size-mib 300 --chunk-mib 128
 
 ```bash
 # 1) 定位 413 阈值（几何 + 二分）
-python3 scripts/probe_upload_limit.py --hi 256
+python3 scripts/tc09_probe_upload_limit.py --hi 256
 
 # 2) 区间内精确探测
-python3 scripts/probe_upload_edge.py
+python3 scripts/tc09_probe_upload_edge.py
 
 # 3) 串行分片上传冒烟（300 MiB / 128 MiB 分片）
-python3 scripts/chunked_upload.py --smoke --size-mib 300 --chunk-mib 128
+python3 scripts/tools/chunked_upload.py --smoke --size-mib 300 --chunk-mib 128
 
 # 4) （反例）并发分片会失败
-python3 scripts/chunked_upload.py --smoke --size-mib 300 --chunk-mib 128 --concurrency 3
+python3 scripts/tools/chunked_upload.py --smoke --size-mib 300 --chunk-mib 128 --concurrency 3
 ```
 
 > 所有探针脚本内置 `CleanupRegistry`，结束自动回收实例/工具；

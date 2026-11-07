@@ -11,7 +11,7 @@
 | 工具名 | `agstest-vt-*`（测后已回收） |
 | CBS 数据卷 | `vol-01a1aa5d-...`（`cedricbwang-cbs-bench`，20Gi，Retain，测后保留） |
 
-> **修订记录**：初版报告曾把 AgentCBS 判为「产品不支持」，复查 [docs/guides/agscbs-disk.md](../docs/guides/agscbs-disk.md) / [agscbs-sys.md](../docs/guides/agscbs-sys.md)
+> **修订记录**：初版报告曾把 AgentCBS 判为「产品不支持」，复查 [docs/references/agscbs-disk.md](../../docs/references/agscbs-disk.md) / [agscbs-sys.md](../../docs/references/agscbs-sys.md)
 > 后确认是**测试方法错误**（漏传系统盘开关）。已按正确方式重测并修正全部结论，见 §2。
 
 ---
@@ -36,7 +36,7 @@
 ## 2. AgentCBS 接入（已打通）
 
 > 初版测试曾判定「CBS 不可用」——那是**误判**。真实原因是漏传了系统盘开关，
-> 详见 §2.2。按 [agscbs-disk.md](../docs/guides/agscbs-disk.md) / [agscbs-sys.md](../docs/guides/agscbs-sys.md) 修正后 CBS 已完整跑通。
+> 详见 §2.2。按 [agscbs-disk.md](../../docs/references/agscbs-disk.md) / [agscbs-sys.md](../../docs/references/agscbs-sys.md) 修正后 CBS 已完整跑通。
 
 ### 2.1 三块存储模板实际配置（`DescribeVolumeTemplateList`）
 
@@ -56,7 +56,7 @@ UnsupportedOperation.SandboxInstance
 AgentCBS Volume requires an AgentCBS SystemDisk instance
 ```
 
-**正确做法**（[agscbs-sys.md](../docs/guides/agscbs-sys.md) + [agscbs-disk.md](../docs/guides/agscbs-disk.md)）：
+**正确做法**（[agscbs-sys.md](../../docs/references/agscbs-sys.md) + [agscbs-disk.md](../../docs/references/agscbs-disk.md)）：
 
 1. AgentCBS **数据盘**用独立的 `Volume` 资源管理，**不走** `VolumeTemplate` 的 `StorageMounts`；
    先 `CreateVolume` 创建 `StorageType=AgentCbs` 的数据卷，等 `Status=ACTIVE` 拿到 `VolumeId`；

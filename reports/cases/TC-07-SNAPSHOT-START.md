@@ -1,15 +1,15 @@
-# TC-10 快照创建实例的真实加速验证
+# TC-07 快照创建实例的真实加速验证
 
 | 项 | 值 |
 |---|---|
-| 测试例编号 | TC-10 |
+| 测试例编号 | TC-07 |
 | 测试目标 | 验证「从沙箱快照恢复实例」相比「冷启动」是否真的更快 |
 | 地域 | `ap-beijing` |
 | 网络模式 | `SANDBOX` |
 | 规格 | 2C / 4Gi |
 | 镜像 | `euson-tcr.tencentcloudcr.com/cedricbwang/test:v1` |
 | 测试日期 | 2026-11-06 |
-| 参考 | [auto-snapshot.md](../docs/guides/auto-snapshot.md)（上海 2026-08-12 暂停恢复/Snapshot/Fork 报告） |
+| 参考 | [auto-snapshot.md](../../docs/references/auto-snapshot.md)（上海 2026-08-12 暂停恢复/Snapshot/Fork 报告） |
 | 结论 | ✅ **快照启动与冷启动基本持平（差异 < 6%）**，无加速收益；首次快照恢复有 ~2.5s 冷加载代价 |
 | 关键提醒 | 测量前必须把 `ProbePeriodMs` 调到 500，否则 2s 探测周期完全掩盖真实差异 |
 
@@ -171,22 +171,22 @@ ags.call('StartSandboxInstance', {'SnapshotId': snapshot_id, 'Timeout': '10m'})
 
 ### 4.3 与「auto-snapshot 后缀」的关系
 
-TC-09 已证明工具名结尾 `auto-snapshot` **不会触发任何快照机制**。
-本 TC-10 走的是**显式快照路径**（CreateSandboxSnapshot + SnapshotId），
+TC-06 已证明工具名结尾 `auto-snapshot` **不会触发任何快照机制**。
+本 TC-07 走的是**显式快照路径**（CreateSandboxSnapshot + SnapshotId），
 这是产品真实提供的快照能力，但从实测看**在当前环境下没有启动加速价值**。
 
 ---
 
 ## 5. 复现方式
 
-完整脚本见 `scripts/tc10_snapshot_start.py`：
+完整脚本见 `scripts/tc07_snapshot_start.py`：
 
 ```bash
 # 全流程：建工具 → 起系统盘实例 → 打快照 → 冷启动/快照启动对照
-python3 scripts/tc10_snapshot_start.py
+python3 scripts/tc07_snapshot_start.py
 
 # 指定探测周期（关键，默认 500ms）
-python3 scripts/tc10_snapshot_start.py --probe-ms 500
+python3 scripts/tc07_snapshot_start.py --probe-ms 500
 ```
 
 ---
