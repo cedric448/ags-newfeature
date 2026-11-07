@@ -20,8 +20,11 @@
 | TC-06 | 沙箱快照 Sandbox Snapshot | ⏭ 暂缓 | — |
 | TC-07 | WAA 沙箱 | ⏭ 暂缓 | — |
 | TC-08 | OSWorld 沙箱 | ⏭ 暂缓 | — |
+| [TC-09](reports/TC-09-AUTO-SNAPSHOT.md) | auto-snapshot 启动速度对照 | ⚠️ 无差异 | 4/4 |
+| [TC-10](reports/TC-10-SNAPSHOT-START.md) | 快照创建实例的真实加速验证 | ⚠️ 无收益（持平） | 5/5 |
+| [TC-11](reports/TC-11-PAUSE-RESUME.md) | 带内存快照与 Pause/Resume 延迟 | ⚠️ 快照不支持内存态 | 6/6 |
 
-**合计：4 个测试例，59 个检查点，58 通过 / 1 失败（真实产品缺陷）。**
+**合计：7 个测试例，74 个检查点，58 通过 / 1 失败 / 15 结论为无差异、无收益或能力受限。**
 
 完整结论、关键发现与文档偏差清单见 **[reports/SUMMARY.md](reports/SUMMARY.md)**。
 
@@ -59,6 +62,9 @@
 │   ├── SUMMARY.md             # ★ 总报告
 │   ├── UPLOAD-LIMIT.md        # 数据面文件上传上限踩坑记录
 │   ├── STORAGE-TEMPLATE-BENCH.md  # 存储模板挂载与读写性能
+│   ├── TC-09-AUTO-SNAPSHOT.md     # auto-snapshot 启动速度对照
+│   ├── TC-10-SNAPSHOT-START.md    # 快照创建实例加速验证
+│   ├── TC-11-PAUSE-RESUME.md      # 带内存快照与 Pause/Resume 延迟
 │   ├── TC-01-VPC.md
 │   ├── TC-02.md
 │   ├── TC-03.md
