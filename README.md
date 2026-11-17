@@ -21,8 +21,9 @@
 | TC-07 | 快照创建实例的真实加速验证 | ⚠️ 无收益 | 5/5 | [报告](reports/cases/TC-07-SNAPSHOT-START.md) |
 | TC-08 | 带内存快照与 Pause/Resume 延迟 | ⚠️ 能力受限 | 6/6 | [报告](reports/cases/TC-08-PAUSE-RESUME.md) |
 | TC-09 | 数据面文件上传上限（413 / 分片） | ✅ 已定位 | 5/5 | [报告](reports/cases/TC-09-UPLOAD-LIMIT.md) |
+| TC-10 | 系统盘 Resources.Storage 真实生效验证 | ✅ PASS | 11/11 | [报告](reports/cases/TC-10-SYSTEM-DISK.md) |
 
-**合计：9 个测试例，82 个检查点，58 通过 / 1 失败 / 其余为无差异、无收益或能力受限。**
+**合计：10 个测试例，93 个检查点，69 通过 / 1 失败 / 其余为无差异、无收益或能力受限。**
 
 完整结论、关键发现与文档偏差清单见 **[reports/SUMMARY.md](reports/SUMMARY.md)**。
 
@@ -73,6 +74,7 @@ WAA 沙箱、OSWorld 沙箱因依赖较重暂缓；快照相关能力已在 TC-0
 │   ├── tc08_pause_resume.py        # TC-08
 │   ├── tc09_probe_upload_limit.py  # TC-09 上传上限探测
 │   ├── tc09_probe_upload_edge.py   # TC-09 阈值精确定位
+│   ├── tc10_system_disk.py         # TC-10 系统盘真实生效
 │   └── tools/                      # 通用工具脚本
 │       ├── check_readiness.py      # 环境就绪检查
 │       └── chunked_upload.py       # 客户端分片上传实现
@@ -88,7 +90,8 @@ WAA 沙箱、OSWorld 沙箱因依赖较重暂缓；快照相关能力已在 TC-0
 │   │   ├── TC-06-AUTO-SNAPSHOT.md
 │   │   ├── TC-07-SNAPSHOT-START.md
 │   │   ├── TC-08-PAUSE-RESUME.md
-│   │   └── TC-09-UPLOAD-LIMIT.md
+│   │   ├── TC-09-UPLOAD-LIMIT.md
+│   │   └── TC-10-SYSTEM-DISK.md
 │   └── artifacts/                  # 原始测量数据（不入库）
 │
 ├── testcase-details/               # 逐用例明细（自动生成，25 份）
@@ -158,6 +161,7 @@ python3 scripts/tc06_auto_snapshot.py                               # TC-06 auto
 python3 scripts/tc07_snapshot_start.py --probe-ms 500               # TC-07 快照启动
 python3 scripts/tc08_pause_resume.py --verify-memory                # TC-08 Pause/Resume
 python3 scripts/tc09_probe_upload_limit.py --hi 256                 # TC-09 上传上限探测
+python3 scripts/tc10_system_disk.py                                 # TC-10 系统盘生效验证
 ```
 
 > **重要**：测量启动/恢复延迟时务必把 `ProbePeriodMs` 压到 500ms，

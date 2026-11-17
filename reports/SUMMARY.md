@@ -265,7 +265,8 @@ ags-newfeature/
 │   │   ├── TC-06-AUTO-SNAPSHOT.md
 │   │   ├── TC-07-SNAPSHOT-START.md
 │   │   ├── TC-08-PAUSE-RESUME.md
-│   │   └── TC-09-UPLOAD-LIMIT.md
+│   │   ├── TC-09-UPLOAD-LIMIT.md
+│   │   └── TC-10-SYSTEM-DISK.md
 │   └── artifacts/                    # 原始测量数据（不入库）
 └── testcase-details/                 # 逐用例明细（自动生成，25 份）
 ```
