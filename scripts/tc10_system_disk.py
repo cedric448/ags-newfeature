@@ -32,7 +32,10 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 from lib import CFG, AgsApi, CleanupRegistry, ensure_domain  # noqa: E402
 
 ENVD_CMD = "/usr/bin/envd -port 49983"
-DEFAULT_SIZES = ["1Gi", "20Gi", "50Gi", "100Gi", "150Gi"]
+# 档位规则（见文档）：1-100Gi 按 1Gi 递增；105-300Gi 按 5Gi 递增；另有 128Gi、256Gi 特殊档
+# 本账号 ap-beijing 上限 150Gi，故 256/300Gi 只能作为负例验证
+DEFAULT_SIZES = ["1Gi", "20Gi", "50Gi", "100Gi", "105Gi", "110Gi", "128Gi", "150Gi"]
+OVER_LIMIT_SIZES = ["256Gi", "300Gi"]
 
 
 def build_payload(name, storage, cpu="2000m", memory="4096Mi"):
@@ -102,7 +105,12 @@ def judge(declared_gi, actual_gib):
         return False, "无法读取根分区容量"
     diff = abs(actual_gib - declared_gi) / float(declared_gi)
     delta_mib = (actual_gib - declared_gi) * 1024
-    detail = "偏差%.1f%%(%+.0fMiB)" % (diff * 100, delta_mib)
+    detail = "偏差%.2f%%(%+.0fMiB)" % (diff * 100, delta_mib)
+    # 特殊档位（128Gi = 2^37 字节）会精确落在整 GiB 上，偏差 0
+    if diff <= 0.005:
+        detail += " [整 GiB 对齐]"
+    elif diff <= 0.08:
+        detail += " [按十进制 GB 分配]"
     if diff <= 0.08:
         return True, "一致 " + detail
     return False, "不一致（声明%dGi，实测%sGi，%s）" % (declared_gi, actual_gib, detail)
@@ -245,12 +253,16 @@ def main():
     if not args.skip_negative:
         print("")
         print("--- [D] 负例 ---")
-        for tag, storage, cpu in [
+        neg_cases = [
             ("exceed-limit", "999Gi", "2000m"),
             ("bad-step", "103Gi", "2000m"),
             ("bad-unit", "50G", "2000m"),
             ("no-cpu", "20Gi", None),
-        ]:
+        ]
+        # 特殊档位 256Gi / 300Gi 本身合法，但超过本账号 150Gi 上限
+        for size in OVER_LIMIT_SIZES:
+            neg_cases.append(("over-limit-" + size, size, "2000m"))
+        for tag, storage, cpu in neg_cases:
             n = run_negative(ags, tag, storage, cpu)
             neg.append(n)
             print("  %-14s %-9s [%s] %s" % (

@@ -21,7 +21,7 @@
 | TC-07 | 快照创建实例的真实加速验证 | ⚠️ 无收益 | 5/5 | [报告](reports/cases/TC-07-SNAPSHOT-START.md) |
 | TC-08 | 带内存快照与 Pause/Resume 延迟 | ⚠️ 能力受限 | 6/6 | [报告](reports/cases/TC-08-PAUSE-RESUME.md) |
 | TC-09 | 数据面文件上传上限（413 / 分片） | ✅ 已定位 | 5/5 | [报告](reports/cases/TC-09-UPLOAD-LIMIT.md) |
-| TC-10 | 系统盘真实生效验证（含存量工具更新容量） | ✅ PASS | 12/12 | [报告](reports/cases/TC-10-SYSTEM-DISK.md) |
+| TC-10 | 系统盘真实生效验证（含存量工具更新与特殊档位） | ✅ PASS | 15/15 | [报告](reports/cases/TC-10-SYSTEM-DISK.md) |
 
 **合计：10 个测试例，93 个检查点，69 通过 / 1 失败 / 其余为无差异、无收益或能力受限。**
 
