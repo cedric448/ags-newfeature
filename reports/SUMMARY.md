@@ -23,7 +23,17 @@
 | TC-07 | WAA 沙箱 | ⏭ **SKIP** | — | 按决策暂缓（重依赖） |
 | TC-08 | OSWorld 沙箱 | ⏭ **SKIP** | — | 按决策暂缓（重依赖） |
 
-**总计：4 个测试例，59 个检查点，58 通过 / 1 失败（真实产品缺陷）。**
+**总计：11 个测试例，107 个检查点；累计 2 个真实产品缺陷（BUG-01 / BUG-02）。**
+
+| 测试例 | 名称 | 结论 |
+|---|---|---|
+| TC-05 | 存储模板挂载与读写性能（CFS/COS/CBS） | ✅ 已打通 |
+| TC-06 | auto-snapshot 启动速度对照 | ⚠️ 无差异 |
+| TC-07 | 快照创建实例加速验证 | ⚠️ 无收益 |
+| TC-08 | 带内存快照与 Pause/Resume | ⚠️ 能力受限（快照不支持内存态） |
+| TC-09 | 数据面文件上传上限 | ✅ 已定位（256 MiB） |
+| TC-10 | 系统盘真实生效验证 | ✅ PASS 15/15 |
+| TC-11 | 镜像预热 PreCacheImage 接口 | ✅ PASS 14/14 |
 
 > 全部测试例均使用**用户提供的自建资源**：
 > AgentBucket 媒体库 `smh3qv6cmcoscm4i`、AgentCFS `cfs-45a313f3e`。
@@ -267,7 +277,8 @@ ags-newfeature/
 │   │   ├── TC-07-SNAPSHOT-START.md
 │   │   ├── TC-08-PAUSE-RESUME.md
 │   │   ├── TC-09-UPLOAD-LIMIT.md
-│   │   └── TC-10-SYSTEM-DISK.md
+│   │   ├── TC-10-SYSTEM-DISK.md
+│   │   ├── TC-11-PRECACHE.md
 │   └── artifacts/                    # 原始测量数据（不入库）
 └── testcase-details/                 # 逐用例明细（自动生成，25 份）
 ```

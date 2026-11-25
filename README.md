@@ -22,8 +22,9 @@
 | TC-08 | 带内存快照与 Pause/Resume 延迟 | ⚠️ 能力受限 | 6/6 | [报告](reports/cases/TC-08-PAUSE-RESUME.md) |
 | TC-09 | 数据面文件上传上限（413 / 分片） | ✅ 已定位 | 5/5 | [报告](reports/cases/TC-09-UPLOAD-LIMIT.md) |
 | TC-10 | 系统盘真实生效验证（含存量工具更新与特殊档位） | ✅ PASS | 15/15 | [报告](reports/cases/TC-10-SYSTEM-DISK.md) |
+| TC-11 | 镜像预热 PreCacheImage 接口 | ✅ PASS | 14/14 | [报告](reports/cases/TC-11-PRECACHE.md) |
 
-**合计：10 个测试例，93 个检查点，69 通过 / 1 失败 / 其余为无差异、无收益或能力受限。**
+**合计：11 个测试例，107 个检查点，83 通过 / 1 失败 / 其余为无差异、无收益或能力受限；累计 2 个缺陷（BUG-01/02）。**
 
 完整结论、关键发现与文档偏差清单见 **[reports/SUMMARY.md](reports/SUMMARY.md)**。
 
@@ -76,6 +77,7 @@ WAA 沙箱、OSWorld 沙箱因依赖较重暂缓；快照相关能力已在 TC-0
 │   ├── tc09_probe_upload_edge.py   # TC-09 阈值精确定位
 │   ├── tc10_system_disk.py         # TC-10 系统盘真实生效
 │   ├── tc10_5_update_disk.py       # TC-10-5 存量工具更新容量
+│   ├── tc11_precache.py            # TC-11 镜像预热接口
 │   ├── bug02_clock_vdso.py         # BUG-02 vDSO 时钟回退复现
 │   └── tools/                      # 通用工具脚本
 │       ├── check_readiness.py      # 环境就绪检查
@@ -93,7 +95,8 @@ WAA 沙箱、OSWorld 沙箱因依赖较重暂缓；快照相关能力已在 TC-0
 │   │   ├── TC-07-SNAPSHOT-START.md
 │   │   ├── TC-08-PAUSE-RESUME.md
 │   │   ├── TC-09-UPLOAD-LIMIT.md
-│   │   └── TC-10-SYSTEM-DISK.md
+│   │   ├── TC-10-SYSTEM-DISK.md
+│   │   ├── TC-11-PRECACHE.md
 │   └── artifacts/                  # 原始测量数据（不入库）
 │
 ├── testcase-details/               # 逐用例明细（自动生成，25 份）
@@ -165,6 +168,7 @@ python3 scripts/tc08_pause_resume.py --verify-memory                # TC-08 Paus
 python3 scripts/tc09_probe_upload_limit.py --hi 256                 # TC-09 上传上限探测
 python3 scripts/tc10_system_disk.py                                 # TC-10 系统盘生效验证
 python3 scripts/tc10_5_update_disk.py                               # TC-10-5 存量工具改容量
+python3 scripts/tc11_precache.py                                    # TC-11 镜像预热接口
 ```
 
 > **重要**：测量启动/恢复延迟时务必把 `ProbePeriodMs` 压到 500ms，
