@@ -34,6 +34,7 @@
 | ID | 严重度 | 标题 | 证据 |
 |---|---|---|---|
 | **BUG-01** | 中高 | CFS 挂载的实例级只读收紧不生效 | `testcase-details/TC-04-6-*.md`：`MountOptions.ReadOnly=true` 被控制面接受并原样回读，但沙箱内挂载仍为 `rw`（virtiofs），写入成功。对照 AgentBucket 同类能力（TC-02-7）工作正常 |
+| **BUG-02** | **高** | AGS 沙箱 `clock_gettime(CLOCK_MONOTONIC)` 回退系统调用，vDSO 快路径失效 | [`reports/cases/BUG-02-VDSO-CLOCK.md`](cases/BUG-02-VDSO-CLOCK.md)：单次 240–297 ns（正常 26–29 ns，慢 8–11 倍）；`via_glibc ≈ via_syscall` 证明未走 vDSO；全部 Tool 类型/网络模式复现；根因指向 PVM 下 kvm-clock 初始化缺失。业务影响：KV 基准吞吐 69 万 vs Docker 185 万 |
 | **ISSUE-01** | 低（体验） | CFS `Path` 校验延迟到启动实例阶段 | `testcase-details/TC-04-2-*.md`：`Path` 不存在时 `CreateSandboxTool` 仍返回 ACTIVE，直到 `StartSandboxInstance` 才报 `FailedOperation.StorageMount` |
 
 ---
@@ -291,6 +292,7 @@ python3 scripts/tc04_agentcfs.py                                   # 北京，VP
 | 项 | 需要谁 | 说明 |
 |---|---|---|
 | **BUG-01 修复** | AGS 产品团队 | CFS `MountOptions.ReadOnly=true` 未在沙箱内生效（证据见 `reports/cases/TC-04-AGENTCFS.md`） |
+| **BUG-02 定位与修复** | AGS 产品团队 | PVM 下 kvm-clock 未完成初始化，导致 vDSO 时钟回退 syscall（证据见 `reports/cases/BUG-02-VDSO-CLOCK.md`） |
 | **ISSUE-01 改进** | AGS 产品团队 | CFS `Path` 校验建议提前到 `CreateSandboxTool` 阶段 |
 | 快照功能范围澄清 | 产品/用户 | 公开 API/SDK/文档均无 Snapshot，需明确是什么功能 |
 | WAA / OSWorld | 用户 | 需 WAA 兼容模板 / OSWorld 兼容模板 + 模型 Key |

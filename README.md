@@ -76,6 +76,7 @@ WAA 沙箱、OSWorld 沙箱因依赖较重暂缓；快照相关能力已在 TC-0
 │   ├── tc09_probe_upload_edge.py   # TC-09 阈值精确定位
 │   ├── tc10_system_disk.py         # TC-10 系统盘真实生效
 │   ├── tc10_5_update_disk.py       # TC-10-5 存量工具更新容量
+│   ├── bug02_clock_vdso.py         # BUG-02 vDSO 时钟回退复现
 │   └── tools/                      # 通用工具脚本
 │       ├── check_readiness.py      # 环境就绪检查
 │       └── chunked_upload.py       # 客户端分片上传实现
@@ -188,7 +189,25 @@ python3 scripts/tc10_5_update_disk.py                               # TC-10-5 �
 | 4 | `FailedOperation.ContainerStart` | 启动命令指向的 envd 路径不存在（镜像内已有 `/usr/bin/envd`） | 修正启动命令 |
 | 5 | `InvalidParameter: InstanceIds.0 类型错误` | `StartSandboxInstance` 返回 `{"Instance":{"InstanceId":...}}` 嵌套结构 | 解析嵌套字段 |
 
-### 2. 缺陷 BUG-01：CFS 实例级只读收紧不生效（中高）
+### 2. 缺陷 BUG-02：沙箱内高精度计时回退系统调用（高）
+
+AGS 沙箱内 `clock_gettime(CLOCK_MONOTONIC)` **不走 vDSO 快路径**，每次陷入内核：
+
+| 指标 | AGS 沙箱 | 正常 KVM 虚机 |
+|---|---|---|
+| `clock_gettime(MONOTONIC)` | **240–297 ns** | 26–29 ns |
+| `clock_gettime(MONOTONIC_COARSE)` | 3.9 ns | 5.8 ns |
+| `via_glibc` vs `via_syscall` | 240.0 vs 240.2 ns（**相等 = 未走 vDSO**） | 显著分离 |
+
+5 个 Tool（custom / code-interpreter）、两种网络模式（SANDBOX / VPC）**全部复现**。
+根因指向 PVM（`kvm_pvm_guest`）下 kvm-clock 初始化日志完全缺失，pvclock 页未建立。
+
+业务影响：KV 基准吞吐 69 万 req/s（AGS）vs 185 万（Docker）。
+
+详见 **[reports/cases/BUG-02-VDSO-CLOCK.md](reports/cases/BUG-02-VDSO-CLOCK.md)**，
+复现脚本 `scripts/bug02_clock_vdso.py`。
+
+### 3. 缺陷 BUG-01：CFS 实例级只读收紧不生效（中高）
 
 - **复现**：工具级 `ReadOnly=false`，实例级 `MountOptions.ReadOnly=true`
 - **实际**：控制面接受并原样回读 `true`，但沙箱内挂载仍是 `rw`，写入成功
