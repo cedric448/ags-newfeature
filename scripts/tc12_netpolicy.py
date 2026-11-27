@@ -1,22 +1,24 @@
 #!/usr/bin/env python3
 """TC-12 AGS 网络代理 + NetworkPolicy 测试。
 
-目标：
-  1. 创建 VPC 网络类型的 AGS Tool（子网与测试机同子网，可访问本机代理）
-  2. 沙箱内经本机内网 IP 的 HTTP 代理访问外网（出口香港）
-  3. 创建沙箱时用 x-network-policy=deny-all 禁网，PATCH 改 allow-all 后恢复联网
+场景：
+  1. 创建 VPC 网络类型 Tool（子网与测试机同子网，可访问本机代理）
+  2. 沙箱内经本机内网 IP 的代理出网（出口香港）
+  3. 创建沙箱时 x-network-policy=deny-all 禁网，执行完 PATCH 为 allow-all 联网
 
-实测结论（2026-11-07，ap-beijing）：
-  - VPC 工具 + 同子网（172.21.80.0/20）可以访问本机代理，出口确认为香港
-  - NetworkPolicy **未对本账号开通**，三条路径均返回
-    `UnsupportedOperation.SandboxTool: NetworkPolicy is not enabled for this account`
-  - 原生 metadata["x-network-policy"] 不会被 StartSandboxInstance 识别（落入普通 metadata）
-  - E2B 兼容接口 metadata["x-network-policy"] 才会映射到 NetworkPolicy，但同样被白名单拦截
+关键结论（2026-11-27 实测，ap-beijing，账号已完成 NetworkPolicy 白名单）：
+  - VPC 工具必须选用与本机相同的子网，否则 NetworkConnector 隔离导致不可达
+  - **NetworkPolicy 启用后，沙箱进程内的 `curl -x 代理` 不再可用**：zeroproxy sidecar
+    通过 iptables 拦截全部 TCP，外部代理请求会被改写，返回 400/502
+  - 正确做法：用 `Decision=upstream` + `UpstreamConfig.ForwardProxy=true` 把流量
+    交给本机代理转发。缺少 ForwardProxy 时上游收到的是原始 TLS 字节，代理无法识别
+    （会返回 400 / 502 / 500）
+  - deny-all 返回 403 `No policy rule matched the request`
+  - PATCH 为 allow-all 后约 10s 内生效，https 恢复 204，出口为香港
 
 用法：
-    python3 scripts/tc12_netpolicy.py --proxy-ip 172.21.80.142 --proxy-port 1087
-    python3 scripts/tc12_netpolicy.py --probe-only    # 只验证代理链路
-    python3 scripts/tc12_netpolicy.py --cleanup       # 清理工具与实例
+    python3 scripts/tc12_netpolicy.py
+    python3 scripts/tc12_netpolicy.py --probe-only   # 只验证代理链路
 """
 from __future__ import annotations
 
@@ -28,11 +30,13 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
-from lib import CFG, AgsApi, ensure_domain  # noqa: E402
+from lib import CFG, AgsApi, E2B, ensure_domain  # noqa: E402
 
 ENVD_CMD = "/usr/bin/envd -port 49983"
-DENY_ALL = {"DefaultDecision": "deny", "Rules": []}
-ALLOW_ALL = {"DefaultDecision": "allow", "Rules": []}
+
+C_HTTPS = ("timeout 20 curl -s -o /dev/null --write-out '%{http_code}' "
+           "https://www.gstatic.com/generate_204")  # noqa: E501
+C_IPINFO = "timeout 20 curl -s https://ipinfo.io/json | tr -d '\\n' | head -c 200"
 
 
 def build_tool(name, subnet_id, sg_id):
@@ -61,14 +65,28 @@ def build_tool(name, subnet_id, sg_id):
     }
 
 
-def curl_via_proxy(ip, port, timeout=20):
-    return ("timeout %d curl -s -o /dev/null -w '%%{http_code} %%{time_total}s' "
-            "-x http://%s:%d http://www.gstatic.com/generate_204") % (timeout, ip, port)
+def policy_deny():
+    return {"DefaultDecision": "deny", "Rules": []}
 
 
-def curl_direct(timeout=10):
-    return ("timeout %d curl -s -o /dev/null -w '%%{http_code}' "
-            "http://www.gstatic.com/generate_204") % timeout
+def policy_allow_via_proxy(proxy_ip, proxy_port):
+    """allow-all，并把出网流量交给本机代理转发。
+
+    ForwardProxy=true 是必要条件：开启后才按 HTTP forward proxy 语义转发
+    （HTTP absolute-form / HTTPS CONNECT 隧道），否则上游收到原始 TLS 字节无法处理。
+    """
+    return {
+        "DefaultDecision": "allow",
+        "Rules": [{
+            "Name": "forward-all-via-local-proxy",
+            "Decision": "upstream",
+            "Resources": [{"Hosts": ["*"]}],
+            "UpstreamConfig": {
+                "Host": proxy_ip, "Scheme": "http", "Port": proxy_port,
+                "ForwardProxy": True,
+            },
+        }],
+    }
 
 
 def main():
@@ -78,7 +96,6 @@ def main():
     ap.add_argument("--subnet", default="subnet-heh2tv3n")
     ap.add_argument("--sg", default="sg-p3sxc9y3")
     ap.add_argument("--probe-only", action="store_true")
-    ap.add_argument("--cleanup", action="store_true")
     args = ap.parse_args()
 
     ensure_domain()
@@ -88,111 +105,139 @@ def main():
     checks = []
 
     def add(name, ok, detail=""):
-        checks.append({"name": name, "pass": bool(ok), "detail": str(detail)[:120]})
-        print("  %-46s %s  %s" % (name, "PASS" if ok else "FAIL", str(detail)[:70]))
+        checks.append({"name": name, "pass": bool(ok), "detail": str(detail)[:140]})
+        print("  %-44s %s  %s" % (name, "PASS" if ok else "FAIL", str(detail)[:80]))
         sys.stdout.flush()
+
+    def run_code(sb, cmd):
+        try:
+            return sb.commands.run(cmd, user="root", timeout=90).stdout.strip()
+        except Exception:  # noqa: BLE001
+            return ""
 
     print("=== TC-12 AGS 网络代理 + NetworkPolicy ===")
     print("region=%s proxy=%s:%d" % (ags.region, args.proxy_ip, args.proxy_port))
     print()
 
-    # ---- 1. 创建 VPC 工具 ----
+    # ---- 1. VPC 工具 ----
     print("[1] 创建 VPC 网络类型 Tool")
     name = "%s-np-%d" % (CFG.run_prefix, int(time.time()))
     try:
         tid = ags.create_tool(build_tool(name, args.subnet, args.sg))["ToolId"]
         ags.wait_tool(tid, want="ACTIVE", timeout=900)
-        t = ags.get_tool(tid) or {}
-        nc = t.get("NetworkConfiguration") or {}
-        print("  ToolId=%s  NetworkMode=%s" % (tid, nc.get("NetworkMode")))
+        nc = (ags.get_tool(tid) or {}).get("NetworkConfiguration") or {}
+        print("  ToolId=%s NetworkMode=%s" % (tid, nc.get("NetworkMode")))
         print("  VpcConfig=%s" % json.dumps(nc.get("VpcConfig"), ensure_ascii=False))
         add("VPC Tool 创建成功", nc.get("NetworkMode") == "VPC", tid)
     except Exception as exc:  # noqa: BLE001
         add("VPC Tool 创建成功", False, str(exc)[:150])
         return 1
 
-    # ---- 2. 启动实例并验证代理 ----
+    # ---- 2. 无策略基线下验证代理链路 ----
     print()
-    print("[2] 启动实例并验证本机代理链路")
+    print("[2] 基线：无 NetworkPolicy 时经本机代理出网")
     r = ags.call("StartSandboxInstance", {"ToolId": tid, "Timeout": "30m"})
     iid = (r.get("Instance") or {}).get("InstanceId") or r.get("InstanceId")
     ags.wait_instance(iid, want="RUNNING", timeout=900)
     print("  InstanceId=%s" % iid)
     sbx = Sandbox.connect(iid)
 
-    tcp = sbx.commands.run(
-        "timeout 6 bash -c '</dev/tcp/%s/%d' 2>&1 && echo OK || echo FAIL" % (
-            args.proxy_ip, args.proxy_port), user="root", timeout=60).stdout.strip()
+    tcp = run_code(sbx, "timeout 6 bash -c '</dev/tcp/%s/%d' 2>&1 && echo OK || echo FAIL"
+                        % (args.proxy_ip, args.proxy_port))
     add("沙箱可连通本机代理端口", tcp.endswith("OK"), "%s:%d" % (args.proxy_ip, args.proxy_port))
 
-    out = sbx.commands.run(curl_via_proxy(args.proxy_ip, args.proxy_port),
-                           user="root", timeout=90).stdout.strip()
-    add("经代理出网成功", out.startswith("204"), out)
+    code = run_code(sbx, "timeout 20 curl -s -o /dev/null --write-out '%%{http_code}' "
+                         "-x http://%s:%d http://www.gstatic.com/generate_204"
+                         % (args.proxy_ip, args.proxy_port))
+    add("基线经代理出网成功", code == "204", code)
 
-    info = sbx.commands.run(
-        "timeout 20 curl -s -x http://%s:%d https://ipinfo.io/json" % (
-            args.proxy_ip, args.proxy_port), user="root", timeout=90).stdout
-    hk = "Hong Kong" in info
-    add("代理出口为香港", hk, info.split('"city":')[1][:22].strip() if '"city"' in info else "")
+    info = run_code(sbx, "timeout 20 curl -s -x http://%s:%d https://ipinfo.io/json"
+                         % (args.proxy_ip, args.proxy_port))
+    add("基线代理出口为香港", "Hong Kong" in info,
+        (info.split('"ip"')[-1][:46] if info else "(empty)"))
 
-    try:
-        direct = sbx.commands.run(curl_direct(), user="root", timeout=60).stdout.strip()
-    except Exception:  # noqa: BLE001
-        direct = ""  # 超时/非 0 退出即视为不可达（预期行为）
-    add("直连（不经代理）不可达", direct in ("", "000"), direct or "(timeout)")
+    direct = run_code(sbx, "timeout 12 curl -s -o /dev/null --write-out '%%{http_code}' "
+                           "http://www.baidu.com")
+    add("基线直连公网不可达", direct in ("", "000"), direct or "(timeout)")
 
-    # ---- 3. NetworkPolicy ----
-    print()
-    print("[3] NetworkPolicy: 创建时 deny-all -> PATCH allow-all")
-    deny_ok = False
-    try:
-        sb2 = __import__("lib").E2B.create(name, timeout=1800, metadata={
-            "owner": "tc12",
-            "x-network-policy": json.dumps(DENY_ALL, separators=(",", ":")),
-        })
-        sid = sb2.sandbox_id
-        print("  创建成功 sandbox=%s（策略已下发）" % sid)
-        inst = ags.get_instance(sid) or {}
-        print("  NetworkPolicy 回读: %s" % json.dumps(inst.get("NetworkPolicy"), ensure_ascii=False))
-        r1 = sb2.commands.run(curl_via_proxy(args.proxy_ip, args.proxy_port),
-                              user="root", timeout=90).stdout.strip()
-        add("deny-all 下代理被阻断", not r1.startswith("204"), r1)
-        deny_ok = True
-    except Exception as exc:  # noqa: BLE001
-        msg = str(exc)
-        not_enabled = "NetworkPolicy is not enabled" in msg
-        add("创建时 deny-all 生效", False,
-            "账号未开通 NetworkPolicy" if not_enabled else msg[:120])
-        if not_enabled:
-            print("  -> NetworkPolicy 未对本账号开通，后续 PATCH 验证跳过")
-
-    if deny_ok:
-        try:
-            ags.call("UpdateSandboxInstance", {"InstanceId": sid, "NetworkPolicy": ALLOW_ALL})
-            time.sleep(5)
-            r2 = sb2.commands.run(curl_via_proxy(args.proxy_ip, args.proxy_port),
-                                  user="root", timeout=90).stdout.strip()
-            add("PATCH 为 allow-all 后代理恢复", r2.startswith("204"), r2)
-        except Exception as exc:  # noqa: BLE001
-            add("PATCH 为 allow-all 后代理恢复", False, str(exc)[:120])
-
-    passed = sum(1 for c in checks if c["pass"])
-    print()
-    print("=" * 78)
-    print("结论：%d/%d 检查点通过" % (passed, len(checks)))
-    print("=" * 78)
-
-    out_path = Path("reports/artifacts/tc12-netpolicy.json")
-    out_path.parent.mkdir(parents=True, exist_ok=True)
-    out_path.write_text(json.dumps({
-        "params": vars(args), "tool_id": tid, "instance_id": iid,
-        "checks": checks, "summary": {"pass": passed, "total": len(checks)},
-    }, ensure_ascii=False, indent=2), encoding="utf-8")
-    print("明细已写入 %s" % out_path)
-
-    if not args.probe_only:
+    if args.probe_only:
         try:
             ags.stop_instance(iid)
+        except Exception:  # noqa: BLE001
+            pass
+        return 0 if all(c["pass"] for c in checks) else 1
+
+    # ---- 3. deny-all 创建 ----
+    print()
+    print("[3] 创建沙箱时 x-network-policy = deny-all（禁网）")
+    deny = policy_deny()
+    sb = E2B.create(name, timeout=1800, metadata={
+        "owner": "tc12",
+        "x-network-policy": json.dumps(deny, separators=(",", ":")),
+    })
+    sid = sb.sandbox_id
+    print("  sandbox=%s" % sid)
+    np_read = (ags.get_instance(sid) or {}).get("NetworkPolicy")
+    print("  NetworkPolicy 回读=%s" % json.dumps(np_read, ensure_ascii=False))
+    add("创建时 deny-all 已下发", (np_read or {}).get("DefaultDecision") == "deny",
+        json.dumps(np_read, ensure_ascii=False))
+    time.sleep(10)
+
+    d1 = run_code(sb, C_HTTPS)
+    d2 = run_code(sb, C_IPINFO)
+    blocked = d1 == "403" and "Request denied" in d2
+    add("deny-all 下 HTTPS 出网被阻断", d1 == "403", d1)
+    add("deny-all 返回 No policy rule matched", "No policy rule matched" in d2,
+        d2[:70] if d2 else "(empty)")
+
+    # ---- 4. PATCH 为 allow-all ----
+    print()
+    print("[4] PATCH -> allow-all（经本机代理转发）")
+    allow = policy_allow_via_proxy(args.proxy_ip, args.proxy_port)
+    ags.call("UpdateSandboxInstance", {"InstanceId": sid, "NetworkPolicy": allow})
+    print("  UpdateSandboxInstance 已提交")
+
+    ok = False
+    waited = 0
+    for _ in range(9):
+        time.sleep(10)
+        waited += 10
+        c = run_code(sb, "timeout 15 curl -s -o /dev/null "
+                         "--write-out '%{http_code}' https://www.gstatic.com/generate_204")
+        np_now = (ags.get_instance(sid) or {}).get("NetworkPolicy")
+        print("    t+%ds NP.DefaultDecision=%s https=%s" % (
+            waited, (np_now or {}).get("DefaultDecision"), c))
+        if c == "204":
+            ok = True
+            break
+    add("PATCH 为 allow-all 后 HTTPS 恢复", ok, "%d s 生效" % waited if ok else "超时")
+
+    a1 = run_code(sb, "timeout 20 curl -s -o /dev/null --write-out '%{http_code}' http://example.com")
+    add("allow-all 下 HTTP 出网成功", a1 == "200", a1)
+
+    a2 = run_code(sb, C_IPINFO)
+    add("allow-all 后代理出口为香港", "Hong Kong" in a2,
+        (a2.split('"ip"')[-1][:46] if a2 else "(empty)"))
+
+    # ---- 汇总 ----
+    passed = sum(1 for c in checks if c["pass"])
+    print()
+    print("=" * 80)
+    print("结论：%d/%d 检查点通过" % (passed, len(checks)))
+    print("=" * 80)
+
+    out = Path("reports/artifacts/tc12-netpolicy.json")
+    out.parent.mkdir(parents=True, exist_ok=True)
+    out.write_text(json.dumps({
+        "params": vars(args), "tool_id": tid, "instance_id": iid, "sandbox_id": sid,
+        "deny_policy": deny, "allow_policy": allow,
+        "checks": checks, "summary": {"pass": passed, "total": len(checks)},
+    }, ensure_ascii=False, indent=2), encoding="utf-8")
+    print("明细已写入 %s" % out)
+
+    for x in (iid, sid):
+        try:
+            ags.stop_instance(x)
         except Exception:  # noqa: BLE001
             pass
     return 0 if passed == len(checks) else 1

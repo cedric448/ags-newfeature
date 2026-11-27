@@ -23,7 +23,7 @@
 | TC-09 | 数据面文件上传上限（413 / 分片） | ✅ 已定位 | 5/5 | [报告](reports/cases/TC-09-UPLOAD-LIMIT.md) |
 | TC-10 | 系统盘真实生效验证（含存量工具更新与特殊档位） | ✅ PASS | 15/15 | [报告](reports/cases/TC-10-SYSTEM-DISK.md) |
 | TC-11 | 镜像预热 PreCacheImage 接口 | ✅ PASS | 14/14 | [报告](reports/cases/TC-11-PRECACHE.md) |
-| TC-12 | VPC 代理出网 + NetworkPolicy | ⚠️ 代理 5/5，策略未开通 | 5/6 | [报告](reports/cases/TC-12-NETPOLICY.md) |
+| TC-12 | VPC 代理出网 + NetworkPolicy 禁网/放行 | ✅ PASS | 11/11 | [报告](reports/cases/TC-12-NETPOLICY.md) |
 
 **合计：11 个测试例，107 个检查点，83 通过 / 1 失败 / 其余为无差异、无收益或能力受限；累计 2 个缺陷（BUG-01/02）。**
 

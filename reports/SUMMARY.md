@@ -34,7 +34,7 @@
 | TC-09 | 数据面文件上传上限 | ✅ 已定位（256 MiB） |
 | TC-10 | 系统盘真实生效验证 | ✅ PASS 15/15 |
 | TC-11 | 镜像预热 PreCacheImage 接口 | ✅ PASS 14/14 |
-| TC-12 | VPC 代理出网 + NetworkPolicy | ⚠️ 代理 5/5；NetworkPolicy 账号未开通 |
+| TC-12 | VPC 代理出网 + NetworkPolicy 禁网/放行 | ✅ PASS 11/11 |
 
 > 全部测试例均使用**用户提供的自建资源**：
 > AgentBucket 媒体库 `smh3qv6cmcoscm4i`、AgentCFS `cfs-45a313f3e`。
