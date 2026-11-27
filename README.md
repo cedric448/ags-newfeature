@@ -23,6 +23,7 @@
 | TC-09 | 数据面文件上传上限（413 / 分片） | ✅ 已定位 | 5/5 | [报告](reports/cases/TC-09-UPLOAD-LIMIT.md) |
 | TC-10 | 系统盘真实生效验证（含存量工具更新与特殊档位） | ✅ PASS | 15/15 | [报告](reports/cases/TC-10-SYSTEM-DISK.md) |
 | TC-11 | 镜像预热 PreCacheImage 接口 | ✅ PASS | 14/14 | [报告](reports/cases/TC-11-PRECACHE.md) |
+| TC-12 | VPC 代理出网 + NetworkPolicy | ⚠️ 代理 5/5，策略未开通 | 5/6 | [报告](reports/cases/TC-12-NETPOLICY.md) |
 
 **合计：11 个测试例，107 个检查点，83 通过 / 1 失败 / 其余为无差异、无收益或能力受限；累计 2 个缺陷（BUG-01/02）。**
 
@@ -78,6 +79,7 @@ WAA 沙箱、OSWorld 沙箱因依赖较重暂缓；快照相关能力已在 TC-0
 │   ├── tc10_system_disk.py         # TC-10 系统盘真实生效
 │   ├── tc10_5_update_disk.py       # TC-10-5 存量工具更新容量
 │   ├── tc11_precache.py            # TC-11 镜像预热接口
+│   ├── tc12_netpolicy.py           # TC-12 代理 + NetworkPolicy
 │   ├── bug02_clock_vdso.py         # BUG-02 vDSO 时钟回退复现
 │   └── tools/                      # 通用工具脚本
 │       ├── check_readiness.py      # 环境就绪检查
@@ -97,6 +99,7 @@ WAA 沙箱、OSWorld 沙箱因依赖较重暂缓；快照相关能力已在 TC-0
 │   │   ├── TC-09-UPLOAD-LIMIT.md
 │   │   ├── TC-10-SYSTEM-DISK.md
 │   │   ├── TC-11-PRECACHE.md
+│   │   ├── TC-12-NETPOLICY.md
 │   └── artifacts/                  # 原始测量数据（不入库）
 │
 ├── testcase-details/               # 逐用例明细（自动生成，25 份）
@@ -169,6 +172,7 @@ python3 scripts/tc09_probe_upload_limit.py --hi 256                 # TC-09 上�
 python3 scripts/tc10_system_disk.py                                 # TC-10 系统盘生效验证
 python3 scripts/tc10_5_update_disk.py                               # TC-10-5 存量工具改容量
 python3 scripts/tc11_precache.py                                    # TC-11 镜像预热接口
+python3 scripts/tc12_netpolicy.py --probe-only                      # TC-12 代理链路验证
 ```
 
 > **重要**：测量启动/恢复延迟时务必把 `ProbePeriodMs` 压到 500ms，
